@@ -836,6 +836,7 @@ def build_contact():
 <section class="section">
   <div class="container layout-aside">
     <div>
+      <div class="for-you" style="margin-bottom:28px"><strong>Loopt er een termijn?</strong>Vermeld dat duidelijk in uw bericht, bijvoorbeeld de datum van een besluit of ontslag. Dan geven wij uw vraag voorrang.</div>
       <h2>Stuur ons een bericht</h2>
       {contact_form()}
     </div>
@@ -843,8 +844,6 @@ def build_contact():
       <h3>Contactgegevens</h3>
       <p>{ICON["mail"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}<a href="mailto:{EMAIL}">{EMAIL}</a></p>
       <p>{ICON["clock"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}Afspraken in overleg, ook buiten kantooruren.</p>
-      <h3 style="margin-top:24px">Loopt er een termijn?</h3>
-      <p>Vermeld dat duidelijk in uw bericht, bijvoorbeeld de datum van een besluit of ontslag. Dan geven wij uw vraag voorrang.</p>
     </aside>
   </div>
 </section>'''
