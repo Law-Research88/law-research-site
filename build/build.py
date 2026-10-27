@@ -346,7 +346,7 @@ def contact_form(prefill=None):
   </div>
   <div class="field"><label for="ikben">Ik ben</label><select id="ikben" name="ik_ben"><option>Particulier</option><option>Ondernemer / organisatie</option></select></div>
   <div class="field"><label for="bericht">Uw vraag</label><textarea id="bericht" name="bericht" required placeholder="Beschrijf kort wat er speelt en of er een termijn loopt (bijvoorbeeld een bezwaartermijn of ontslagdatum)."></textarea></div>
-  <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> Ik ga akkoord dat Law &amp; Research mijn gegevens gebruikt om contact met mij op te nemen (zie de <a href="privacy.html">privacyverklaring</a>).</label>
+  <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> <span>Ik ga akkoord dat Law &amp; Research mijn gegevens gebruikt om contact met mij op te nemen (zie de <a href="privacy.html">privacyverklaring</a>).</span></label>
   <div class="form-status" role="status" aria-live="polite" hidden></div>
   <div><button class="btn btn--primary" type="submit">Verstuur bericht</button></div>
 </form>
@@ -636,6 +636,19 @@ def refs_html(refs):
 <p>Wij volgen het wetenschappelijk onderzoek op dit rechtsgebied. Een selectie van publicaties waar wij in ons advies gebruik van maken:</p>
 <ul class="ref-list">{items}</ul>'''
 
+PRAKTIJK = '''<div class="praktijk">
+  <span class="eyebrow">Uit de praktijk</span>
+  <h3>Gelijk gekregen in de toeslagenaffaire</h3>
+  <p>Wij stonden mevrouw X bij, een van de eerste gedupeerden van de toeslagenaffaire die haar gelijk kreeg. Na onze inzet werden de besluiten om haar kinderopvangtoeslag terug te vorderen direct stopgezet. Zij ontving bovendien een schadevergoeding.</p>
+  <p>Deze zaak laat zien dat het loont om een besluit van de overheid niet zomaar te accepteren. Ook als u tegenover een grote organisatie staat, kunt u uw recht halen.</p>
+</div>'''
+
+BUDGET = '''<div class="budget">
+  <h3>Bijzondere zaak, maar geen rechtsbijstandsverzekering?</h3>
+  <p>Heeft u een zaak die er echt toe doet, maar geen rechtsbijstandsverzekering, en kunt u ons uurtarief niet betalen? Bespreek uw situatie dan toch met ons. In bijzondere gevallen kunnen wij een zaak aannemen op een andere basis, bijvoorbeeld tegen een aangepast tarief. Zaken met een groter maatschappelijk belang nemen wij soms toch aan. Wij kijken samen met u wat mogelijk is.</p>
+  <p class="budget-note">Dit is geen garantie: wij beoordelen elke aanvraag afzonderlijk.</p>
+</div>'''
+
 def build_area(slug):
     p = AREA_PAGES[slug]
     name = AREA_NAME[slug]
@@ -658,10 +671,12 @@ def build_area(slug):
         <div class="tab-panel" id="tab-part"><h3>Voor particulieren</h3>{p["particulier"]}</div>
         <div class="tab-panel" id="tab-ond" hidden><h3>Voor ondernemers</h3>{p["ondernemer"]}</div>
       </div>
+      {PRAKTIJK if slug == "bestuursrecht" else ""}
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
       {current_html(slug)}
       {refs_html(REFS.get(slug, []))}
+      {BUDGET}
     </div>
     {contact_aside(slug)}
   </div>
@@ -774,7 +789,7 @@ def build_research():
         </div>
         <fieldset class="field" style="border:0;padding:0;margin:0"><legend style="font-weight:600;color:var(--navy-800);margin-bottom:6px">Interesse in</legend><div style="display:grid;gap:6px">{opts}</div></fieldset>
         <div class="field"><label for="r-motivatie">Waarvoor wilt u het materiaal gebruiken?</label><textarea id="r-motivatie" name="motivatie" required></textarea></div>
-        <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> Ik ga akkoord met de verwerking van mijn gegevens voor deze aanvraag (zie de <a href="privacy.html">privacyverklaring</a>).</label>
+        <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> <span>Ik ga akkoord met de verwerking van mijn gegevens voor deze aanvraag (zie de <a href="privacy.html">privacyverklaring</a>).</span></label>
         <div class="form-status" role="status" aria-live="polite" hidden></div>
         <div><button class="btn btn--primary" type="submit">Vraag toegang aan</button></div>
       </form>
@@ -806,6 +821,7 @@ def build_about():
       <h2>Ons verhaal</h2>
       <p>Law &amp; Research is opgericht door mr. Blokland. Zij heeft ruim 20 jaar ervaring als jurist, manager en voormalig advocaat, onder meer bij de FNV en bij verschillende bancaire instellingen. Met die achtergrond én juridische kennis van zaken weet zij wat er in de praktijk speelt, aan beide kanten van de tafel.</p>
       <p>Onze naam zegt waar wij voor staan: naast advies en procederen doen wij gedegen juridisch onderzoek. Die kennis komt direct ten goede aan onze cliënten.</p>
+      <p>Zo stonden wij een van de eerste gedupeerden van de toeslagenaffaire bij die haar gelijk kreeg. De terugvordering van haar kinderopvangtoeslag werd direct stopgezet en zij ontving een schadevergoeding.</p>
       <h2>Waar wij voor staan</h2>
       <ul class="check-list">
         <li><strong>Persoonlijk:</strong> u heeft één vast aanspreekpunt dat uw zaak kent.</li>
@@ -852,6 +868,7 @@ def build_contact():
       <div class="for-you" style="margin-bottom:28px"><strong>Loopt er een termijn?</strong>Vermeld dat duidelijk in uw bericht, bijvoorbeeld de datum van een besluit of ontslag. Dan geven wij uw vraag voorrang.</div>
       <h2>Stuur ons een bericht</h2>
       {contact_form()}
+      {BUDGET}
     </div>
     <aside class="aside-card">
       <h3>Contactgegevens</h3>

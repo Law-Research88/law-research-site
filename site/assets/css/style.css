@@ -354,3 +354,13 @@ p { margin: 0 0 1em; }
 .calc-top { background: var(--navy-50); padding: clamp(36px, 5vw, 56px) 0; }
 .calc-wrap { max-width: 760px; }
 .calc-wrap h2 { margin-bottom: .4em; }
+/* Uit de praktijk en bijzondere zaken */
+.praktijk { background: var(--navy-800); color: #dfe8f1; border-radius: var(--radius); padding: 28px; margin: 2em 0; }
+.praktijk h3 { color: var(--white); font-size: 1.3rem; margin-top: 0 !important; }
+.praktijk p { margin-bottom: .8em; }
+.praktijk p:last-child { margin-bottom: 0; }
+.praktijk .eyebrow { color: var(--accent); }
+.budget { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 22px 24px; margin-top: 2.2em; background: var(--white); }
+.budget h3 { margin-top: 0 !important; }
+.budget p { color: var(--ink-soft); }
+.budget .budget-note { font-size: .88rem; margin: 0; }

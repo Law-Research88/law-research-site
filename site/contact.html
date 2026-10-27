@@ -177,13 +177,18 @@
   </div>
   <div class="field"><label for="ikben">Ik ben</label><select id="ikben" name="ik_ben"><option>Particulier</option><option>Ondernemer / organisatie</option></select></div>
   <div class="field"><label for="bericht">Uw vraag</label><textarea id="bericht" name="bericht" required placeholder="Beschrijf kort wat er speelt en of er een termijn loopt (bijvoorbeeld een bezwaartermijn of ontslagdatum)."></textarea></div>
-  <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> Ik ga akkoord dat Law &amp; Research mijn gegevens gebruikt om contact met mij op te nemen (zie de <a href="privacy.html">privacyverklaring</a>).</label>
+  <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> <span>Ik ga akkoord dat Law &amp; Research mijn gegevens gebruikt om contact met mij op te nemen (zie de <a href="privacy.html">privacyverklaring</a>).</span></label>
   <div class="form-status" role="status" aria-live="polite" hidden></div>
   <div><button class="btn btn--primary" type="submit">Verstuur bericht</button></div>
 </form>
 <script>
 (function(){var p=new URLSearchParams(location.search).get("onderwerp");if(!p)return;var m={bestuursrecht:"Bestuursrecht",arbeidsrecht:"Arbeidsrecht",contractenrecht:"Contractenrecht",vastgoedrecht:"Vastgoedrecht"};var s=document.getElementById("rechtsgebied");if(s&&m[p])s.value=m[p];})();
 </script>
+      <div class="budget">
+  <h3>Bijzondere zaak, maar geen rechtsbijstandsverzekering?</h3>
+  <p>Heeft u een zaak die er echt toe doet, maar geen rechtsbijstandsverzekering, en kunt u ons uurtarief niet betalen? Bespreek uw situatie dan toch met ons. In bijzondere gevallen kunnen wij een zaak aannemen op een andere basis, bijvoorbeeld tegen een aangepast tarief. Zaken met een groter maatschappelijk belang nemen wij soms toch aan. Wij kijken samen met u wat mogelijk is.</p>
+  <p class="budget-note">Dit is geen garantie: wij beoordelen elke aanvraag afzonderlijk.</p>
+</div>
     </div>
     <aside class="aside-card">
       <h3>Contactgegevens</h3>
