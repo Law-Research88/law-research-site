@@ -376,9 +376,17 @@ def hero_page(trail, eyebrow, h1, lead):
 def cta_band():
     return f'''<section class="section section--navy">
   <div class="container cta">
-    <div><h2>Loopt er een termijn?</h2><p>Wacht niet te lang. Bij bezwaar, ontslag en geschillen gelden vaak korte termijnen.</p></div>
+    <div><h2>Hulp nodig bij uw situatie?</h2><p>Leg uw vraag voor. Wij reageren meestal binnen één werkdag.</p></div>
     <a class="btn btn--light" href="contact.html">Leg uw vraag voor</a>
   </div>
+</section>'''
+
+def termijn_strip():
+    return '''<section class="termijn">
+  <div class="container"><div class="termijn-inner">
+    <p><strong>Loopt er een termijn?</strong> Wacht niet te lang. Bij bezwaar, ontslag en geschillen gelden vaak korte termijnen.</p>
+    <a class="btn btn--primary" href="contact.html">Leg uw vraag voor</a>
+  </div></div>
 </section>'''
 
 # ---------- homepage ----------
@@ -408,6 +416,8 @@ def build_home():
     </div>
   </div>
 </section>
+
+{termijn_strip()}
 
 <section class="section" id="rechtsgebieden">
   <div class="container">
@@ -633,6 +643,7 @@ def build_area(slug):
     trail = [("index.html", "Home"), (slug + ".html", name)]
     rel = [n for n in NEWS if n["gebied"] == slug][:3]
     body = f'''{hero_page(trail, name, p["h1"], p["lead"])}
+{termijn_strip()}
 <section class="section">
   <div class="container layout-aside">
     <div class="prose">
@@ -679,6 +690,7 @@ def build_news():
     chips_thema = "".join(f'<button class="chip" type="button" data-filter="thema" data-value="{v}" aria-pressed="false">{l}</button>'
                          for v, l in [("alle", "Alle onderwerpen")] + list(THEMA_NAME.items()))
     body = f'''{hero_page(trail, "Nieuws", "Juridisch nieuws in gewone taal", "Korte, praktische berichten over uitspraken en wetten in het bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht, ook uit het Europese en internationale recht. Bij elk bericht leest u: wat betekent dit voor u?")}
+{termijn_strip()}
 <section class="section section--tint">
   <div class="container">
     {LEGEND}
