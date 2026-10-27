@@ -128,6 +128,7 @@ NEWS = [
 
 from news_extra import EXTRA
 from current_research import CURRENT
+from references import REFS
 NEWS += EXTRA
 for _n in NEWS:
     _n.setdefault("thema", [])
@@ -647,7 +648,7 @@ def build_area(slug):
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
       {current_html(slug)}
-      {refs_html(p.get("refs", []))}
+      {refs_html(REFS.get(slug, []))}
     </div>
     {contact_aside(slug)}
   </div>
