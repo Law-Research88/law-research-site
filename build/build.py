@@ -403,7 +403,6 @@ def build_home():
       <a class="btn btn--light" href="contact.html">Stel uw vraag</a>
       <a class="btn btn--ghost" href="#rechtsgebieden">Bekijk rechtsgebieden</a>
     </div>
-    <p class="hero-note">Weten wat wij doen, is uw goed recht.</p>
     <img class="hero-illustration" src="assets/img/weegschaal.svg" alt="" width="400" height="400">
   </div>
 </section>
