@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 440" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Vrouwe Justitia</title>
+  <g stroke="#1b3d5c" stroke-width="4">
+    <!-- hoofd, haar en blinddoek -->
+    <circle cx="171" cy="78" r="21"/>
+    <path d="M151 68 C158 54 184 52 192 68"/>
+    <circle cx="195" cy="66" r="8"/>
+    <path d="M150 78 H192"/>
+    <path d="M192 78 C204 86 208 96 212 108 M192 80 C199 90 200 100 199 112"/>
+    <!-- hals en schouders -->
+    <path d="M171 99 V112"/>
+    <path d="M138 124 C150 113 192 113 204 124"/>
+    <!-- gewaad met taille -->
+    <path d="M138 124 C134 160 146 188 151 204 C140 262 114 330 98 392 H244 C228 330 202 262 191 204 C196 188 208 160 204 124"/>
+    <path d="M151 204 C164 210 178 210 191 204"/>
+    <path d="M161 210 C156 280 146 340 140 392"/>
+    <path d="M171 211 V392"/>
+    <path d="M181 210 C186 280 196 340 202 392"/>
+    <path d="M150 140 C160 150 182 150 192 140"/>
+    <!-- sokkel -->
+    <path d="M72 392 H270 V412 H72 Z"/>
+    <path d="M58 424 H284"/>
+    <!-- rechterarm omhoog met weegschaal -->
+    <path d="M140 128 C118 118 96 100 76 74"/>
+    <path d="M76 74 V54"/>
+    <path d="M30 54 H122"/>
+    <path d="M30 54 L16 112 M30 54 L44 112"/>
+    <path d="M122 54 L108 112 M122 54 L136 112"/>
+    <path d="M8 112 H52 C50 128 42 134 30 134 C18 134 10 128 8 112 Z"/>
+    <path d="M100 112 H144 C142 128 134 134 122 134 C110 134 102 128 100 112 Z"/>
+    <!-- linkerarm omlaag met zwaard -->
+    <path d="M202 130 C214 160 226 190 238 216"/>
+    <path d="M238 188 V356"/>
+    <path d="M224 216 H252"/>
+  </g>
+  <g fill="#c9a961" stroke="#c9a961" stroke-width="3">
+    <circle cx="76" cy="50" r="6"/>
+    <circle cx="238" cy="182" r="5"/>
+  </g>
+</svg>

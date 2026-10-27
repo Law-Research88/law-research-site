@@ -5,7 +5,7 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1])
 SITE = "https://law-research.nl"
-EMAIL = "blokland@law-research.nl"
+EMAIL = "info@law-research.nl"
 FORM = "https://formspree.io/f/JOUW_FORM_ID"
 TODAY = "2026-10-13"
 ORG_ID = SITE + "/#organisatie"
@@ -25,6 +25,7 @@ ICON = {
     "bestuur": svg('<path d="M3 10l9-6 9 6"/><path d="M4 10h16"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 21h18"/><path d="M4 18h16"/>'),
     "arbeid": svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/><path d="M11 12.5v2h2v-2"/>'),
     "contract": svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 9.5h3"/><path d="M8.5 17.5c1-1.5 2-1.5 2.5 0s1.5 1.5 2.5 0"/>'),
+    "huis": svg('<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5.5h4V20"/>'),
     "research": svg('<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/><path d="M8 10.5h5M10.5 8v5"/>'),
     "lock": svg('<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
     "mail": svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>'),
@@ -39,6 +40,7 @@ AREAS = [
     ("bestuursrecht", "Bestuursrecht", "bestuur", "Bezwaar en beroep tegen besluiten van gemeente, UWV, Belastingdienst en andere overheden."),
     ("arbeidsrecht", "Arbeidsrecht", "arbeid", "Ontslag, vaststellingsovereenkomst, ziekte, loon en arbeidscontracten."),
     ("contractenrecht", "Contractenrecht", "contract", "Contracten en algemene voorwaarden opstellen, toetsen en geschillen oplossen."),
+    ("vastgoedrecht", "Vastgoedrecht", "huis", "Koop en huur van woningen en bedrijfsruimte, voor huurders, verhuurders, kopers en verkopers."),
 ]
 AREA_NAME = {a[0]: a[1] for a in AREAS}
 
@@ -125,13 +127,15 @@ NEWS = [
 ]
 
 from news_extra import EXTRA
+from current_research import CURRENT
+from references import REFS
 NEWS += EXTRA
 for _n in NEWS:
     _n.setdefault("thema", [])
     _n.setdefault("doel", None)
 NEWS.sort(key=lambda n: n["date"] or "0000", reverse=True)
 
-THEMA_NAME = {"huurrecht": "Huurrecht", "europees": "Europees & internationaal", "sociale-zekerheid": "Sociale zekerheid"}
+THEMA_NAME = {"europees": "Europees & internationaal", "sociale-zekerheid": "Sociale zekerheid"}
 DOEL_NAME = {"huurders": "Voor huurders", "verhuurders": "Voor verhuurders"}
 
 def nl_date(iso):
@@ -202,7 +206,7 @@ FOOTER = f'''<footer class="site-footer">
     <div class="footer-grid">
       <div>
         <a class="brand" href="index.html"><img src="assets/img/logo-mark-white.svg" alt="" width="40" height="40"><span class="brand-text">Law &amp; Research</span></a>
-        <p>Juridisch advies en bijstand in bestuursrecht, arbeidsrecht en contractenrecht.</p>
+        <p>Juridisch advies en bijstand in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht.</p>
       </div>
       <div>
         <h3>Rechtsgebieden</h3>
@@ -273,7 +277,7 @@ def page(fname, title, desc, body, ld=(), robots="index, follow", og_type="websi
 <meta property="og:image" content="{SITE}/assets/img/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Law &amp; Research: bestuursrecht, arbeidsrecht en contractenrecht">
+<meta property="og:image:alt" content="Law &amp; Research: bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{html.escape(title)}">
 <meta name="twitter:description" content="{html.escape(desc)}">
@@ -306,10 +310,10 @@ ORG = {
     "logo": SITE + "/assets/img/icon-512.png",
     "image": SITE + "/assets/img/og-image.jpg",
     "email": EMAIL,
-    "description": "Juridisch advies en bijstand voor particulieren en ondernemers in bestuursrecht, arbeidsrecht en contractenrecht.",
+    "description": "Juridisch advies en bijstand voor particulieren en ondernemers in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht.",
     "areaServed": {"@type": "Country", "name": "Nederland"},
     "availableLanguage": ["nl", "en"],
-    "knowsAbout": ["Bestuursrecht", "Arbeidsrecht", "Contractenrecht", "Ambtenarenrecht", "Bezwaar en beroep", "Ontslagrecht", "Algemene voorwaarden"],
+    "knowsAbout": ["Bestuursrecht", "Arbeidsrecht", "Contractenrecht", "Ambtenarenrecht", "Bezwaar en beroep", "Ontslagrecht", "Algemene voorwaarden", "Vastgoedrecht", "Huurrecht", "Koop van onroerende zaken"],
     "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Rechtsgebieden", "itemListElement": [
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n, "url": f"{SITE}/{a}.html"}} for a, n, _, _ in AREAS]},
     "contactPoint": {"@type": "ContactPoint", "contactType": "customer service", "email": EMAIL, "availableLanguage": ["Dutch", "English"]},
@@ -347,7 +351,7 @@ def contact_form(prefill=None):
   <div><button class="btn btn--primary" type="submit">Verstuur bericht</button></div>
 </form>
 <script>
-(function(){{var p=new URLSearchParams(location.search).get("onderwerp");if(!p)return;var m={{bestuursrecht:"Bestuursrecht",arbeidsrecht:"Arbeidsrecht",contractenrecht:"Contractenrecht"}};var s=document.getElementById("rechtsgebied");if(s&&m[p])s.value=m[p];}})();
+(function(){{var p=new URLSearchParams(location.search).get("onderwerp");if(!p)return;var m={{bestuursrecht:"Bestuursrecht",arbeidsrecht:"Arbeidsrecht",contractenrecht:"Contractenrecht",vastgoedrecht:"Vastgoedrecht"}};var s=document.getElementById("rechtsgebied");if(s&&m[p])s.value=m[p];}})();
 </script>'''
 
 def faq_html(faqs):
@@ -386,12 +390,13 @@ def build_home():
   <div class="container">
     <span class="eyebrow">Rechtsbijstand &amp; juridisch onderzoek</span>
     <h1>Helder juridisch advies dat u verder helpt</h1>
-    <p class="lead">Persoonlijke bijstand in bestuursrecht, arbeidsrecht en contractenrecht. Voor particulieren en ondernemers, in begrijpelijke taal en met een duidelijke aanpak.</p>
+    <p class="lead">Persoonlijke bijstand in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Voor particulieren en ondernemers, in begrijpelijke taal en met een duidelijke aanpak.</p>
     <div class="hero-actions">
       <a class="btn btn--light" href="contact.html">Stel uw vraag</a>
       <a class="btn btn--ghost" href="#rechtsgebieden">Bekijk rechtsgebieden</a>
     </div>
     <p class="hero-note">Weten wat wij doen, is uw goed recht.</p>
+    <img class="hero-illustration" src="assets/img/weegschaal.svg" alt="" width="400" height="400">
   </div>
 </section>
 
@@ -408,10 +413,10 @@ def build_home():
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Rechtsgebieden</span>
-      <h2>Gespecialiseerd in drie rechtsgebieden</h2>
-      <p class="lead">Wij richten ons bewust op drie gebieden. Zo kennen we de regels, de rechtspraak en de praktijk door en door.</p>
+      <h2>Gespecialiseerd in vier rechtsgebieden</h2>
+      <p class="lead">Wij richten ons bewust op vier gebieden. Zo kennen we de regels, de rechtspraak en de praktijk door en door.</p>
     </div>
-    <div class="grid-3">
+    <div class="grid-4">
       <article class="card reveal"><span class="icon-badge">{ICON["bestuur"]}</span><h3>Bestuursrecht</h3>
         <p>Bent u het niet eens met een besluit van de gemeente, het UWV, de Belastingdienst of een andere overheid? Wij helpen bij bezwaar en beroep.</p>
         <ul><li>Bezwaar en beroep</li><li>Vergunningen en handhaving</li><li>Uitkeringen en toeslagen</li><li>Ambtenarenrecht</li></ul>
@@ -422,8 +427,12 @@ def build_home():
         <a class="more" href="arbeidsrecht.html">Meer over arbeidsrecht</a></article>
       <article class="card reveal"><span class="icon-badge">{ICON["contract"]}</span><h3>Contractenrecht</h3>
         <p>Goede afspraken voorkomen problemen. Wij stellen contracten op, toetsen ze en helpen als het toch misgaat.</p>
-        <ul><li>Contracten en algemene voorwaarden</li><li>Koop, huur en aanneming</li><li>Wanprestatie en ontbinding</li><li>Incasso en geschillen</li></ul>
+        <ul><li>Contracten en algemene voorwaarden</li><li>Koop en aanneming</li><li>Wanprestatie en ontbinding</li><li>Incasso en geschillen</li></ul>
         <a class="more" href="contractenrecht.html">Meer over contractenrecht</a></article>
+      <article class="card reveal"><span class="icon-badge">{ICON["huis"]}</span><h3>Vastgoedrecht</h3>
+        <p>Voor huurders én verhuurders, kopers én verkopers. Van woning tot winkel of kantoor.</p>
+        <ul><li>Huur van woonruimte</li><li>Huur van bedrijfsruimte</li><li>Koop en verkoop van een woning of pand</li><li>Gebreken, huurprijs en ontruiming</li></ul>
+        <a class="more" href="vastgoedrecht.html">Meer over vastgoedrecht</a></article>
     </div>
   </div>
 </section>
@@ -466,8 +475,8 @@ def build_home():
 {cta_band()}'''
     website = {"@context": "https://schema.org", "@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/",
                "name": "Law & Research", "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}}
-    page("index.html", "Law & Research | Rechtsbijstand bestuursrecht, arbeidsrecht en contractenrecht",
-         "Law & Research: helder juridisch advies in bestuursrecht, arbeidsrecht en contractenrecht voor particulieren en ondernemers.",
+    page("index.html", "Law & Research | Rechtsbijstand bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht",
+         "Law & Research: helder juridisch advies in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht voor particulieren en ondernemers.",
          body, ld=(ORG, website))
 
 # ---------- rechtsgebieden ----------
@@ -542,19 +551,19 @@ AREA_PAGES = {
   h1="Contractenrecht: goede afspraken, minder problemen",
   lead="Het contractenrecht (verbintenissenrecht) is de basis van alle overeenkomsten. Wij helpen u afspraken goed vast te leggen en staan u bij als een ander zich er niet aan houdt.",
   intro='''<h2>Waarmee wij u helpen</h2>
-<p>Of het nu gaat om een aankoop die niet aan de verwachtingen voldoet, een huurwoning met gebreken of een leverancier die niet levert: wij denken met u mee en zoeken naar de beste oplossing, bij voorkeur zonder rechter.</p>''',
+<p>Of het nu gaat om een aankoop die niet aan de verwachtingen voldoet, een aannemer die niet oplevert of een leverancier die niet levert: wij denken met u mee en zoeken naar de beste oplossing, bij voorkeur zonder rechter.</p>''',
   particulier='''<ul class="check-list">
 <li>Een aankoop is kapot of niet zoals beloofd en de verkoper weigert te helpen</li>
-<li>Geschil met uw verhuurder of gebreken aan uw woning</li>
 <li>Problemen met een aannemer of verbouwing</li>
 <li>Onterechte incassokosten of een betwiste rekening</li>
-</ul>''',
+</ul>
+<p>Gaat uw vraag over het huren of kopen van een woning of bedrijfsruimte? Kijk dan bij <a href="vastgoedrecht.html">vastgoedrecht</a>.</p>''',
   ondernemer='''<ul class="check-list">
 <li>Opstellen en beoordelen van contracten en algemene voorwaarden</li>
-<li>Huurovereenkomsten, ontruiming en het innen van huurachterstand</li>
 <li>Geschillen met klanten of leveranciers: wanprestatie, ontbinding, schadevergoeding</li>
 <li>Incasso: van correcte aanmaning tot procedure</li>
-</ul>''',
+</ul>
+<p>Voor huur, verhuur en koop van vastgoed: zie <a href="vastgoedrecht.html">vastgoedrecht</a>.</p>''',
   extra="",
   faqs=[("Is een mondelinge afspraak ook een contract?", "Ja, in de meeste gevallen is een mondelinge afspraak net zo geldig als een schriftelijke. Het probleem zit in het bewijs. Leg belangrijke afspraken daarom altijd schriftelijk vast, al is het maar in een bevestigende e-mail."),
         ("Wat moet ik doen als de andere partij zich niet aan het contract houdt?", "Stuur een schriftelijke ingebrekestelling: een brief waarin u de ander een redelijke termijn geeft om alsnog na te komen. Pas daarna kunt u in veel gevallen schadevergoeding eisen of het contract ontbinden."),
@@ -562,7 +571,60 @@ AREA_PAGES = {
         ("Hoe lang heb ik garantie op een product?", "De wet kent geen vaste garantietermijn: een product moet zo lang meegaan als u redelijkerwijs mag verwachten. Gaat het binnen een jaar kapot, dan moet de verkoper bewijzen dat het gebrek er bij aankoop nog niet was."),
         ("Mag een bedrijf zomaar incassokosten rekenen?", "Bij consumenten alleen na een correcte aanmaning met een betaaltermijn van 14 dagen, en tot een wettelijk maximum. Tussen bedrijven gelden andere regels.")],
  ),
+ "vastgoedrecht": dict(
+  title="Rechtsbijstand vastgoedrecht | Huur en koop van woning en bedrijfsruimte | Law & Research",
+  desc="Hulp bij huur en koop van woningen en bedrijfsruimte, voor huurders, verhuurders, kopers en verkopers: gebreken, huurprijs, borg, opzegging en ontruiming. Law & Research.",
+  h1="Vastgoedrecht: huren, verhuren, kopen en verkopen",
+  lead="Een woning of bedrijfspand is vaak de grootste uitgave of investering die u doet. Gaat er iets mis bij huur of koop, dan staat er veel op het spel. Wij helpen huurders en verhuurders, kopers en verkopers.",
+  intro='''<h2>Waarmee wij u helpen</h2>
+<p>Het vastgoedrecht gaat over de huur en koop van woningen, winkels, kantoren en andere bedrijfsruimte. De regels verschillen sterk per soort ruimte. Zo heeft een huurder van een woning veel meer bescherming dan een huurder van een kantoor. Wij zoeken voor u uit welke regels gelden en wat dat voor uw positie betekent.</p>''',
+  particulier='''<ul class="check-list">
+<li>Gebreken aan uw huurwoning, zoals schimmel of lekkage, en huurverlaging via de Huurcommissie</li>
+<li>Een huurverhoging of servicekosten controleren</li>
+<li>Uw verhuurder wil de huur opzeggen of u uit uw woning zetten</li>
+<li>Uw borg terugkrijgen na het einde van de huur</li>
+<li>Verborgen gebreken na de koop van een huis, of een geschil over de koopovereenkomst</li>
+</ul>''',
+  ondernemer='''<ul class="check-list">
+<li>Huur van winkel-, horeca- of kantoorruimte: het contract, de huurprijs, verlenging en opzegging</li>
+<li>Als verhuurder: een correcte huurovereenkomst, huurachterstand en ontruiming</li>
+<li>De regels voor goed verhuurderschap, vaste huurcontracten en de huurprijs van middenhuurwoningen</li>
+<li>Koop en verkoop van een bedrijfspand of beleggingswoning</li>
+</ul>
+<p>Verhuurt u één of enkele woningen? Ook dan gelden de regels voor goed verhuurderschap. Wij helpen u ze na te leven.</p>''',
+  extra="",
+  faqs=[("Mag mijn verhuurder de huur zomaar verhogen?", "Nee. Een huurverhoging mag meestal één keer per jaar, en voor de meeste huurwoningen geldt een wettelijk maximum. De verhuurder moet de verhoging op tijd schriftelijk voorstellen. Bij een gereguleerde huurwoning kunt u bezwaar maken en de Huurcommissie laten beslissen."),
+        ("Wanneer krijg ik mijn borg terug?", "Sinds 1 juli 2023 moet de verhuurder de borg binnen 14 dagen na het einde van de huur terugbetalen. Trekt hij er schade van af, dan moet hij het resterende bedrag binnen 30 dagen terugbetalen. De borg mag bovendien niet hoger zijn dan twee keer de kale maandhuur."),
+        ("Kan mijn verhuurder de huur van mijn woning zomaar opzeggen?", "Nee. Een huurder van woonruimte heeft huurbescherming. De verhuurder kan alleen opzeggen op een wettelijke grond, zoals dringend eigen gebruik, en als u niet instemt, beslist de rechter. Reageer altijd schriftelijk en binnen de termijn die in de opzegbrief staat."),
+        ("Ik heb een huis gekocht en ontdek een verborgen gebrek. Wat nu?", "Meld het gebrek zo snel mogelijk schriftelijk aan de verkoper. Wacht u te lang, dan kunt u uw rechten verliezen. Of de verkoper aansprakelijk is, hangt onder meer af van wat hij wist en had moeten vertellen, en van wat u zelf had kunnen onderzoeken."),
+        ("Heb ik bedenktijd als ik een huis koop?", "Ja, als particulier heeft u drie dagen bedenktijd nadat u de getekende koopovereenkomst (of een kopie) heeft ontvangen. In die periode kunt u de koop zonder opgave van redenen ontbinden. Voor ondernemers geldt dit niet."),
+        ("Heb ik als huurder van een bedrijfsruimte huurbescherming?", "Dat hangt af van het soort ruimte. Huurders van winkel- en horecaruimte hebben veel bescherming, met in de regel een contract van minimaal vijf plus vijf jaar. Huurders van kantoorruimte hebben alleen beperkte bescherming tegen ontruiming. Laat het contract daarom vóór ondertekening controleren.")],
+ ),
 }
+
+def current_html(slug):
+    c = CURRENT.get(slug)
+    if not c:
+        return ""
+    src = "".join(f'<li><a href="{html.escape(u)}" rel="noopener" target="_blank">{html.escape(t)}</a></li>' for t, u in c["sources"])
+    return f'''<section class="current-research" id="actueel-onderzoek" aria-labelledby="ao-{slug}">
+<span class="eyebrow">Actueel onderzoek</span>
+<h2 id="ao-{slug}">{html.escape(c["title"])}</h2>
+<div class="compare">
+  <div><h3>Nederland</h3><p>{html.escape(c["nl"])}</p></div>
+  <div><h3>Verenigd Koninkrijk</h3><p>{html.escape(c["uk"])}</p></div>
+</div>
+<p><strong>Waarom dit ertoe doet:</strong> {html.escape(c["why"])}</p>
+<p class="news-source">Bronnen:</p><ul class="ref-list">{src}</ul>
+</section>'''
+
+def refs_html(refs):
+    if not refs:
+        return ""
+    items = "".join(f'<li>{html.escape(r["cite"])} <a href="{html.escape(r["url"])}" rel="noopener" target="_blank">Bekijk de publicatie</a><br><span>{html.escape(r["note"])}</span></li>' for r in refs)
+    return f'''<h2>Literatuur en onderzoek</h2>
+<p>Wij volgen het wetenschappelijk onderzoek op dit rechtsgebied. Een selectie van publicaties waar wij in ons advies gebruik van maken:</p>
+<ul class="ref-list">{items}</ul>'''
 
 def build_area(slug):
     p = AREA_PAGES[slug]
@@ -586,6 +648,8 @@ def build_area(slug):
       {p["extra"]}
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
+      {current_html(slug)}
+      {refs_html(REFS.get(slug, []))}
     </div>
     {contact_aside(slug)}
   </div>
@@ -614,7 +678,7 @@ def build_news():
                          for v, l in [("alle", "Alle rechtsgebieden")] + [(a, n) for a, n, _, _ in AREAS])
     chips_thema = "".join(f'<button class="chip" type="button" data-filter="thema" data-value="{v}" aria-pressed="false">{l}</button>'
                          for v, l in [("alle", "Alle onderwerpen")] + list(THEMA_NAME.items()))
-    body = f'''{hero_page(trail, "Nieuws", "Juridisch nieuws in gewone taal", "Korte, praktische berichten over uitspraken en wetten in het bestuursrecht, arbeidsrecht en contractenrecht, ook uit het Europese en internationale recht. Bij elk bericht leest u: wat betekent dit voor u?")}
+    body = f'''{hero_page(trail, "Nieuws", "Juridisch nieuws in gewone taal", "Korte, praktische berichten over uitspraken en wetten in het bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht, ook uit het Europese en internationale recht. Bij elk bericht leest u: wat betekent dit voor u?")}
 <section class="section section--tint">
   <div class="container">
     {LEGEND}
@@ -636,7 +700,7 @@ def build_news():
            "inLanguage": "nl-NL", "mainEntity": {"@type": "ItemList", "itemListElement": [
                {"@type": "ListItem", "position": i + 1, "item": a} for i, a in enumerate(arts)]}}
     page("nieuws.html", "Juridisch nieuws in begrijpelijke taal | Law & Research",
-         "Praktisch nieuws over rechtspraak en nieuwe wetten in bestuursrecht, arbeidsrecht en contractenrecht. Steeds met de vraag: wat betekent dit voor u?",
+         "Praktisch nieuws over rechtspraak en nieuwe wetten in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Steeds met de vraag: wat betekent dit voor u?",
          body, ld=(ORG, lst, breadcrumb_ld(trail)))
 
 # ---------- research ----------
@@ -658,7 +722,19 @@ def build_research():
   <p class="blur" aria-hidden="true">Samenvatting, conclusies en bronnen zijn beschikbaar na goedkeuring van uw aanvraag.</p>
 </article>''' for t, a, d in locked)
     opts = "".join(f'<label class="consent"><input type="checkbox" name="interesse" value="{n}"> {n}</label>' for _, n, _, _ in AREAS)
+    current_cards = "".join(f'''<article class="card reveal"><span class="icon-badge">{ICON[i]}</span>
+  <p style="font-size:.9rem;color:var(--navy-600);font-weight:600">{n}</p>
+  <h3>{html.escape(CURRENT[a]["title"])}</h3>
+  <p>{html.escape(CURRENT[a]["nl"].split(". ")[0])}. En in het Verenigd Koninkrijk?</p>
+  <a class="more" href="{a}.html#actueel-onderzoek">Lees de vergelijking</a></article>''' for a, n, i, _ in AREAS if a in CURRENT)
     body = f'''{hero_page(trail, "Research", "Juridisch onderzoek, op aanvraag beschikbaar", "Naast onze rechtsbijstand doen wij juridisch onderzoek. Analyses, jurisprudentieoverzichten en checklists stellen wij beschikbaar voor professionals, organisaties en studenten. Vraag hieronder toegang aan.")}
+<section class="section section--tint">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Actueel onderzoek</span><h2>Nederland en het Verenigd Koninkrijk vergeleken</h2>
+      <p class="lead">Hoe lossen andere landen dezelfde juridische vragen op? Per rechtsgebied zetten wij een actuele ontwikkeling in breder perspectief.</p></div>
+    <div class="grid-4">{current_cards}</div>
+  </div>
+</section>
 <section class="section">
   <div class="container">
     <div class="section-head"><span class="eyebrow">Publicaties</span><h2>Beschikbaar na goedkeuring</h2>
@@ -704,7 +780,7 @@ def build_research():
     ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Research", "url": SITE + "/research.html",
           "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}, "isAccessibleForFree": False}
     page("research.html", "Juridisch onderzoek en publicaties | Research | Law & Research",
-         "Juridische analyses, jurisprudentieoverzichten en checklists over bestuursrecht, arbeidsrecht en contractenrecht. Vraag toegang aan bij Law & Research.",
+         "Juridische analyses, jurisprudentieoverzichten en checklists over bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Vraag toegang aan bij Law & Research.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- over ons ----------
@@ -726,9 +802,10 @@ def build_about():
       </ul>
     </div>
     <div class="reveal">
+      <img class="illustration" src="assets/img/vrouwe-justitia.svg" alt="Vrouwe Justitia met weegschaal en zwaard" width="320" height="440" loading="lazy">
       <div class="card">
         <h3>Stage bij Law &amp; Research</h3>
-        <p>Ben je masterstudent rechten met een specialisatie in arbeidsrecht, bestuursrecht of contractenrecht? Wij bieden een leerzame praktijkstage van acht weken, met meewerken aan lopende zaken en het bijwonen van zittingen.</p>
+        <p>Ben je masterstudent rechten met een specialisatie in arbeidsrecht, bestuursrecht, contractenrecht of vastgoedrecht? Wij bieden een leerzame praktijkstage van acht weken, met meewerken aan lopende zaken en het bijwonen van zittingen.</p>
         <a class="more" href="mailto:{EMAIL}?subject=Stage%20Law%20%26%20Research">Stuur je cv en motivatie</a>
       </div>
     </div>
@@ -737,18 +814,19 @@ def build_about():
 <section class="section section--navy">
   <div class="container">
     <span class="eyebrow">Rechtsgebieden</span>
-    <h2>Gespecialiseerd in drie gebieden</h2>
+    <h2>Gespecialiseerd in vier gebieden</h2>
     <div class="stats">
       <div><strong><a href="bestuursrecht.html" style="color:inherit">Bestuursrecht</a></strong>Bezwaar en beroep tegen de overheid</div>
       <div><strong><a href="arbeidsrecht.html" style="color:inherit">Arbeidsrecht</a></strong>Voor werknemers en werkgevers</div>
       <div><strong><a href="contractenrecht.html" style="color:inherit">Contractenrecht</a></strong>Contracten, voorwaarden en geschillen</div>
+      <div><strong><a href="vastgoedrecht.html" style="color:inherit">Vastgoedrecht</a></strong>Koop en huur van woningen en bedrijfsruimte</div>
     </div>
   </div>
 </section>'''
     ld = {"@context": "https://schema.org", "@type": "AboutPage", "name": "Over Law & Research", "url": SITE + "/over-ons.html",
           "inLanguage": "nl-NL", "about": {"@id": ORG_ID}}
     page("over-ons.html", "Over ons | Law & Research",
-         "Maak kennis met Law & Research: persoonlijk juridisch advies in bestuursrecht, arbeidsrecht en contractenrecht, toegewijd en met kwaliteit.",
+         "Maak kennis met Law & Research: persoonlijk juridisch advies in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht, toegewijd en met kwaliteit.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- contact ----------
@@ -773,7 +851,7 @@ def build_contact():
     ld = {"@context": "https://schema.org", "@type": "ContactPage", "name": "Contact", "url": SITE + "/contact.html",
           "inLanguage": "nl-NL", "about": {"@id": ORG_ID}}
     page("contact.html", "Contact | Law & Research",
-         "Neem contact op met Law & Research voor advies in bestuursrecht, arbeidsrecht of contractenrecht. Mail naar blokland@law-research.nl of gebruik het contactformulier.",
+         "Neem contact op met Law & Research voor advies in bestuursrecht, arbeidsrecht, contractenrecht of vastgoedrecht. Mail naar info@law-research.nl of gebruik het contactformulier.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- privacy ----------
@@ -820,13 +898,13 @@ def build_404():
     p = OUT / "404.html"
     t = p.read_text(encoding="utf-8")
     for a in ('href="assets/', 'src="assets/', 'href="index.html', 'href="nieuws.html', 'href="research.html', 'href="over-ons.html',
-              'href="contact.html', 'href="privacy.html', 'href="bestuursrecht.html', 'href="arbeidsrecht.html', 'href="contractenrecht.html'):
+              'href="contact.html', 'href="privacy.html', 'href="bestuursrecht.html', 'href="arbeidsrecht.html', 'href="contractenrecht.html', 'href="vastgoedrecht.html'):
         t = t.replace(a, a.replace('="', '="/'))
     p.write_text(t, encoding="utf-8")
 
 def build_meta():
     pages = [("", "1.0", "weekly"), ("bestuursrecht.html", "0.9", "monthly"), ("arbeidsrecht.html", "0.9", "monthly"),
-             ("contractenrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("research.html", "0.6", "monthly"),
+             ("contractenrecht.html", "0.9", "monthly"), ("vastgoedrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("research.html", "0.6", "monthly"),
              ("over-ons.html", "0.6", "yearly"), ("contact.html", "0.7", "yearly"), ("privacy.html", "0.2", "yearly")]
     urls = "".join(f"  <url><loc>{SITE}/{u}</loc><lastmod>{TODAY}</lastmod><changefreq>{c}</changefreq><priority>{p}</priority></url>\n" for u, p, c in pages)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf-8")
