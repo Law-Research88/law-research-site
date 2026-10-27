@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Genereert de statische HTML-pagina's van law-research.nl (gedeelde header/footer)."""
-import json, html, sys
+import json, html, re, sys
 from pathlib import Path
 
 OUT = Path(sys.argv[1])
 SITE = "https://law-research.nl"
 EMAIL = "info@law-research.nl"
 FORM = "https://formspree.io/f/JOUW_FORM_ID"
-TODAY = "2026-10-13"
+TODAY = "2026-10-27"
+FIRST_PUBLISHED = "2026-10-13"  # publicatiedatum van berichten zonder eigen "published"
 ORG_ID = SITE + "/#organisatie"
 
 # ---------- iconen ----------
@@ -143,28 +144,42 @@ def nl_date(iso):
     months = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"]
     return f"{int(d)} {months[int(m)-1]} {y}"
 
-def news_card(n, link=False, heading="h3"):
+def short(text, limit=155):
+    if len(text) <= limit:
+        return text
+    cut = text[:limit - 1].rsplit(" ", 1)[0].rstrip(",.;:")
+    return cut + "…"
+
+def news_url(n):
+    return f'nieuws/{n["id"]}.html'
+
+def news_labels(n):
+    labels = [THEMA_NAME[x] for x in n["thema"]] + ([DOEL_NAME[n["doel"]]] if n["doel"] else [])
+    return ('<div class="news-labels">' + "".join(f'<span class="news-label">{html.escape(l)}</span>' for l in labels) + '</div>') if labels else ""
+
+def news_meta(n):
     t = n["type"]
     icon = ICON["scale"] if t == "jurisprudentie" else ICON["wet"]
     label = "Rechtspraak" if t == "jurisprudentie" else "Wet- en regelgeving"
     cls = "news-type" + (" news-type--wet" if t == "wetgeving" else "")
-    title = html.escape(n["title"])
-    if link:
-        title = f'<a href="nieuws.html#{n["id"]}">{title}</a>'
-    bullets = "".join(f"<li>{html.escape(b)}</li>" for b in n["foryou"])
-    labels = [THEMA_NAME[x] for x in n["thema"]] + ([DOEL_NAME[n["doel"]]] if n["doel"] else [])
-    label_html = ('<div class="news-labels">' + "".join(f'<span class="news-label">{html.escape(l)}</span>' for l in labels) + '</div>') if labels else ""
+    label_html = news_labels(n)
     when = f'<time datetime="{n["date"]}">{html.escape(n["datelabel"])}</time>' if n["date"] else f'<span>{html.escape(n["datelabel"])}</span>'
-    return f'''<article class="news-item reveal" id="{n["id"] if not link else n["id"] + "-kort"}" data-type="{t}" data-gebied="{n["gebied"]}" data-thema="{" ".join(n["thema"])}">
-  <div class="news-meta">
+    return f'''<div class="news-meta">
     <span class="{cls}" title="{label}">{icon}<span class="visually-hidden">{label}</span></span>
     <div class="news-tags"><strong>{label} · {AREA_NAME[n["gebied"]]}</strong>{when}</div>
   </div>
-  {label_html}
-  <{heading}>{title}</{heading}>
-  <p>{html.escape(n["text"])}</p>
-  <div class="for-you"><strong>Wat betekent dit voor u?</strong><ul>{bullets}</ul></div>
-  <p class="news-source">Bron: <a href="{n["url"]}" rel="noopener" target="_blank">{html.escape(n["source"])}</a></p>
+  {label_html}'''
+
+def news_card(n, heading="h3", anchor=False):
+    """Korte versie met 'Lees meer' naar de eigen pagina van het bericht (zelfde venster)."""
+    url = news_url(n)
+    title = html.escape(n["title"])
+    rid = f' id="{n["id"]}"' if anchor else ""
+    return f'''<article class="news-item reveal"{rid} data-type="{n["type"]}" data-gebied="{n["gebied"]}" data-thema="{" ".join(n["thema"])}">
+  {news_meta(n)}
+  <{heading}><a href="{url}">{title}</a></{heading}>
+  <p>{html.escape(short(n["text"], 200))}</p>
+  <a class="more" href="{url}">Lees meer<span class="visually-hidden">: {title}</span></a>
 </article>'''
 
 LEGEND = f'''<div class="news-legend" aria-label="Legenda">
@@ -254,7 +269,9 @@ def breadcrumb_html(trail):
             lis.append(f'<li><a href="{u}">{html.escape(n)}</a></li>')
     return f'<nav class="breadcrumb" aria-label="Kruimelpad"><ol>{"".join(lis)}</ol></nav>'
 
-def page(fname, title, desc, body, ld=(), robots="index, follow", og_type="website"):
+REL = re.compile(r'((?:href|src)=")(?!https?:|/|#|mailto:|\?|data:)')
+
+def page(fname, title, desc, body, ld=(), robots="index, follow", og_type="website", extra_head=""):
     url = SITE + "/" + ("" if fname == "index.html" else fname)
     lds = "\n".join(jsonld(x) for x in ld)
     doc = f'''<!doctype html>
@@ -287,7 +304,7 @@ def page(fname, title, desc, body, ld=(), robots="index, follow", og_type="websi
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="stylesheet" href="assets/css/style.css">
-{lds}
+{extra_head}{lds}
 </head>
 <body>
 {header(fname)}
@@ -298,6 +315,10 @@ def page(fname, title, desc, body, ld=(), robots="index, follow", og_type="websi
 </body>
 </html>
 '''
+    depth = fname.count("/")
+    if depth:  # pagina in een submap: relatieve links één niveau omhoog
+        doc = REL.sub(lambda m: m.group(1) + "../" * depth, doc)
+    (OUT / fname).parent.mkdir(parents=True, exist_ok=True)
     (OUT / fname).write_text(doc, encoding="utf-8")
 
 ORG = {
@@ -454,7 +475,7 @@ def build_home():
       <p class="lead">Korte berichten over nieuwe uitspraken en regels, met praktische tips.</p>
     </div>
     {LEGEND}
-    <div class="news-list news-list--home">{"".join(news_card(n, link=True) for n in home_news)}</div>
+    <div class="news-list news-list--home">{"".join(news_card(n) for n in home_news)}</div>
     <p style="margin-top:28px"><a class="btn btn--outline" href="nieuws.html">Alle nieuwsberichten</a></p>
   </div>
 </section>
@@ -484,15 +505,15 @@ def build_home():
 {cta_band()}'''
     website = {"@context": "https://schema.org", "@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/",
                "name": "Law & Research", "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}}
-    page("index.html", "Law & Research | Rechtsbijstand bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht",
-         "Law & Research: helder juridisch advies in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht voor particulieren en ondernemers.",
+    page("index.html", "Law & Research | Juridisch advies en rechtsbijstand",
+         "Juridisch advies en rechtsbijstand bij ontslag, bezwaar tegen de overheid, contracten en huur. Voor particulieren en ondernemers. Stel vrijblijvend uw vraag.",
          body, ld=(ORG, website))
 
 # ---------- rechtsgebieden ----------
 AREA_PAGES = {
  "bestuursrecht": dict(
-  title="Rechtsbijstand bestuursrecht | Bezwaar en beroep | Law & Research",
-  desc="Niet eens met een besluit van de gemeente, het UWV of de Belastingdienst? Law & Research helpt bij bezwaar en beroep in het bestuursrecht. Inclusief rekenhulp bezwaartermijn.",
+  title="Bezwaar maken tegen de overheid | Bestuursrecht | Law & Research",
+  desc="Bezwaar maken tegen de gemeente, het UWV, de Belastingdienst of Toeslagen? Hulp bij bezwaar en beroep, met rekenhulp voor de bezwaartermijn.",
   h1="Bestuursrecht: niet eens met de overheid?",
   lead="Als burger of ondernemer krijgt u regelmatig te maken met besluiten van de overheid. Bent u het daar niet mee eens? Dan kunt u bij ons terecht voor gedegen advies en bijstand.",
   intro='''<h2>Waarmee wij u helpen</h2>
@@ -522,11 +543,14 @@ AREA_PAGES = {
         ("Wat gebeurt er als ik te laat ben?", "Een te laat bezwaar wordt meestal niet-ontvankelijk verklaard. Dan wordt er niet meer inhoudelijk naar gekeken. Alleen in uitzonderlijke situaties wordt een termijnoverschrijding verschoonbaar geacht. Reageer daarom altijd op tijd, desnoods met een kort 'pro forma' bezwaar."),
         ("Wat is een pro forma bezwaar?", "Een kort bezwaarschrift om de termijn veilig te stellen, waarin u aangeeft dat de gronden (de inhoudelijke argumenten) later volgen. U krijgt dan meestal een extra termijn om het bezwaar aan te vullen."),
         ("Kan ik een vergoeding krijgen voor de kosten?", "Wordt het besluit in bezwaar of beroep herroepen omdat het onrechtmatig was, dan kunt u een vergoeding van proceskosten vragen. Een rechtsbijstandsverzekering kan de kosten soms ook dekken."),
+        ("Hoe maak ik bezwaar tegen de WOZ-waarde?", "Maak binnen zes weken na de datum op de aanslag bezwaar bij uw gemeente. Dat is gratis en kan meestal online. Vraag eerst het taxatieverslag op en vergelijk de woningen waarmee uw huis is vergeleken. Wijst u op verschillen in grootte, staat of ligging, dan heeft uw bezwaar meer kans."),
+        ("Kan ik bezwaar maken tegen een verkeersboete?", "Ja. Tegen een verkeersboete van het CJIB (Wet Mulder) stelt u binnen zes weken na de datum van de beschikking beroep in bij de officier van justitie. Meestal moet u het boetebedrag eerst als zekerheid betalen. Krijgt u gelijk, dan krijgt u het terug. Bent u het daarna nog niet eens, dan kunt u naar de kantonrechter."),
+        ("Moet ik mijn toeslag terugbetalen?", "Als de definitieve berekening lager uitvalt dan het voorschot, vraagt Dienst Toeslagen het verschil terug. Klopt de berekening volgens u niet, bijvoorbeeld omdat uw inkomen verkeerd is ingeschat, maak dan binnen zes weken bezwaar. Kunt u niet in één keer betalen, vraag dan een betalingsregeling aan."),
         ("Geldt voor ambtenaren nog het bestuursrecht?", "Sinds 1 januari 2020 vallen de meeste ambtenaren onder het gewone arbeidsrecht (Wet normalisering rechtspositie ambtenaren). Voor bepaalde groepen, zoals militairen en politie, gelden nog bijzondere regels. Wij kijken graag mee welke regels voor u gelden.")],
  ),
  "arbeidsrecht": dict(
-  title="Rechtsbijstand arbeidsrecht | Ontslag en vaststellingsovereenkomst | Law & Research",
-  desc="Juridische hulp bij arbeidsrecht voor werknemers en werkgevers: ontslag, vaststellingsovereenkomst, ziekte, loon en arbeidscontracten. Law & Research.",
+  title="Arbeidsrecht: hulp bij ontslag | Law & Research",
+  desc="Hulp bij ontslag op staande voet, vaststellingsovereenkomst, transitievergoeding, ziekte en opzegtermijn. Voor werknemers en werkgevers.",
   h1="Arbeidsrecht voor werknemers en werkgevers",
   lead="Het arbeidsrecht lijkt eenvoudig: werk tegen loon. Toch kunnen er in een arbeidsrelatie veel conflicten ontstaan. Wij kennen de wet, de cao-praktijk en de rechtspraak.",
   intro='''<h2>Waarmee wij u helpen</h2>
@@ -552,11 +576,14 @@ AREA_PAGES = {
         ("Hoe snel moet ik reageren op een ontslag op staande voet?", "Snel. Wilt u het ontslag laten vernietigen, dan moet u dat binnen twee maanden na het ontslag aan de kantonrechter vragen. Protesteer daarnaast direct schriftelijk en geef aan dat u beschikbaar blijft om te werken."),
         ("Heb ik recht op een transitievergoeding?", "In de meeste gevallen wel, als de werkgever het initiatief neemt tot ontslag of een tijdelijk contract niet verlengt. Dit geldt vanaf de eerste werkdag. Bij ernstig verwijtbaar handelen van de werknemer kan het recht vervallen."),
         ("Ik ben zzp'er, maar werk eigenlijk als werknemer. Wat nu?", "Volgens de Hoge Raad (Deliveroo, 2023) gaat het om hoe er in de praktijk gewerkt wordt, niet om wat er in het contract staat. Mogelijk heeft u dan rechten als werknemer. Wij beoordelen uw situatie graag."),
+        ("Wat is de opzegtermijn als ik zelf ontslag neem?", "Volgens de wet is dat één maand, ongeacht hoe lang u in dienst bent. In uw contract of cao kan een andere termijn staan, maar die mag niet langer zijn dan zes maanden. U zegt in principe op tegen het einde van de maand. Zegt de werkgever op, dan geldt een termijn van één tot vier maanden, afhankelijk van de duur van het dienstverband."),
+        ("Hoe lang mag een proeftijd duren?", "Bij een contract van zes maanden of korter mag geen proeftijd worden afgesproken. Bij een contract langer dan zes maanden maar korter dan twee jaar is het maximaal één maand, en bij een contract van twee jaar of langer of voor onbepaalde tijd maximaal twee maanden. De proeftijd moet schriftelijk zijn afgesproken en voor beide partijen gelijk zijn."),
+        ("Is mijn concurrentiebeding geldig?", "Een concurrentiebeding moet schriftelijk zijn afgesproken. In een tijdelijk contract is het alleen geldig als de werkgever in het contract uitlegt welk zwaarwegend bedrijfsbelang het nodig maakt. Ook een geldig beding kan de rechter geheel of gedeeltelijk vernietigen als u er onredelijk door wordt benadeeld. Laat het beding beoordelen voordat u een nieuwe baan aanneemt."),
         ("Wat kost juridische hulp bij arbeidsrecht?", "Dat hangt af van uw zaak. Wij bespreken vooraf wat u kunt verwachten. Bij een vaststellingsovereenkomst betaalt de werkgever vaak (een deel van) de kosten van juridisch advies. Ook een rechtsbijstandsverzekering kan de kosten dekken.")],
  ),
  "contractenrecht": dict(
-  title="Rechtsbijstand contractenrecht | Contracten en algemene voorwaarden | Law & Research",
-  desc="Hulp bij het opstellen en toetsen van contracten en algemene voorwaarden, en bij geschillen over koop, huur, aanneming en wanprestatie. Law & Research.",
+  title="Contractenrecht en algemene voorwaarden | Law & Research",
+  desc="Hulp bij contracten en algemene voorwaarden, garantie, ingebrekestelling, wanprestatie, incassokosten en geschillen met een aannemer of webshop.",
   h1="Contractenrecht: goede afspraken, minder problemen",
   lead="Het contractenrecht (verbintenissenrecht) is de basis van alle overeenkomsten. Wij helpen u afspraken goed vast te leggen en staan u bij als een ander zich er niet aan houdt.",
   intro='''<h2>Waarmee wij u helpen</h2>
@@ -578,11 +605,13 @@ AREA_PAGES = {
         ("Wat moet ik doen als de andere partij zich niet aan het contract houdt?", "Stuur een schriftelijke ingebrekestelling: een brief waarin u de ander een redelijke termijn geeft om alsnog na te komen. Pas daarna kunt u in veel gevallen schadevergoeding eisen of het contract ontbinden."),
         ("Zijn mijn algemene voorwaarden geldig?", "Alleen als u ze vóór of bij het sluiten van de overeenkomst aan de klant heeft gegeven (de informatieplicht). Bepaalde bedingen zijn bovendien verboden of vernietigbaar, zeker tegenover consumenten. Laat uw voorwaarden periodiek toetsen."),
         ("Hoe lang heb ik garantie op een product?", "De wet kent geen vaste garantietermijn: een product moet zo lang meegaan als u redelijkerwijs mag verwachten. Gaat het binnen een jaar kapot, dan moet de verkoper bewijzen dat het gebrek er bij aankoop nog niet was."),
+        ("Hoe zeg ik een abonnement op dat stilzwijgend is verlengd?", "Is uw abonnement als consument na de eerste periode automatisch verlengd, dan mag u het op elk moment opzeggen met een opzegtermijn van maximaal één maand. Zeg schriftelijk of per e-mail op en bewaar de bevestiging. Een boete voor tussentijds opzeggen mag na zo'n verlenging niet."),
+        ("Hoeveel bedenktijd heb ik bij een online aankoop?", "Koopt u als consument iets online, dan heeft u 14 dagen bedenktijd vanaf de dag dat u het product ontvangt. Daarna heeft u nog 14 dagen om het terug te sturen, en de webshop moet u binnen 14 dagen terugbetalen. Voor sommige producten geldt geen bedenktijd, zoals maatwerk en bederfelijke waren."),
         ("Mag een bedrijf zomaar incassokosten rekenen?", "Bij consumenten alleen na een correcte aanmaning met een betaaltermijn van 14 dagen, en tot een wettelijk maximum. Tussen bedrijven gelden andere regels.")],
  ),
  "vastgoedrecht": dict(
-  title="Rechtsbijstand vastgoedrecht | Huur en koop van woning en bedrijfsruimte | Law & Research",
-  desc="Hulp bij huur en koop van woningen en bedrijfsruimte, voor huurders, verhuurders, kopers en verkopers: gebreken, huurprijs, borg, opzegging en ontruiming. Law & Research.",
+  title="Huurrecht en vastgoedrecht: huur en koop | Law & Research",
+  desc="Hulp bij huurverhoging, huurcommissie, gebreken, borg, opzegging en ontruiming, en bij de koop van een woning. Voor huurders, verhuurders en kopers.",
   h1="Vastgoedrecht: huren, verhuren, kopen en verkopen",
   lead="Een woning of bedrijfspand is vaak de grootste uitgave of investering die u doet. Gaat er iets mis bij huur of koop, dan staat er veel op het spel. Wij helpen huurders en verhuurders, kopers en verkopers.",
   intro='''<h2>Waarmee wij u helpen</h2>
@@ -607,6 +636,8 @@ AREA_PAGES = {
         ("Kan mijn verhuurder de huur van mijn woning zomaar opzeggen?", "Nee. Een huurder van woonruimte heeft huurbescherming. De verhuurder kan alleen opzeggen op een wettelijke grond, zoals dringend eigen gebruik, en als u niet instemt, beslist de rechter. Reageer altijd schriftelijk en binnen de termijn die in de opzegbrief staat."),
         ("Ik heb een huis gekocht en ontdek een verborgen gebrek. Wat nu?", "Meld het gebrek zo snel mogelijk schriftelijk aan de verkoper. Wacht u te lang, dan kunt u uw rechten verliezen. Of de verkoper aansprakelijk is, hangt onder meer af van wat hij wist en had moeten vertellen, en van wat u zelf had kunnen onderzoeken."),
         ("Heb ik bedenktijd als ik een huis koop?", "Ja, als particulier heeft u drie dagen bedenktijd nadat u de getekende koopovereenkomst (of een kopie) heeft ontvangen. In die periode kunt u de koop zonder opgave van redenen ontbinden. Voor ondernemers geldt dit niet."),
+        ("Wat doet de Huurcommissie?", "De Huurcommissie beslist bij geschillen tussen huurder en verhuurder over de huurprijs, een huurverhoging, servicekosten en achterstallig onderhoud. U betaalt een kleine bijdrage, die u terugkrijgt als u gelijk krijgt. Met de huurprijscheck op de website van de Huurcommissie ziet u vooraf of uw huur te hoog lijkt."),
+        ("Hoe weet ik of mijn huur te hoog is?", "De maximale huur van de meeste huurwoningen hangt af van het aantal punten in het woningwaarderingsstelsel. Punten krijgt u onder meer voor de oppervlakte, de keuken, het sanitair, het energielabel en de WOZ-waarde. Sinds de Wet betaalbare huur (1 juli 2024) geldt een maximale huurprijs ook voor middenhuurwoningen tot 186 punten."),
         ("Heb ik als huurder van een bedrijfsruimte huurbescherming?", "Dat hangt af van het soort ruimte. Huurders van winkel- en horecaruimte hebben veel bescherming, met in de regel een contract van minimaal vijf plus vijf jaar. Huurders van kantoorruimte hebben alleen beperkte bescherming tegen ontruiming. Laat het contract daarom vóór ondertekening controleren.")],
  ),
 }
@@ -653,7 +684,7 @@ def build_area(slug):
     name = AREA_NAME[slug]
     icon = dict((a, i) for a, _, i, _ in AREAS)[slug]
     trail = [("index.html", "Home"), (slug + ".html", name)]
-    rel = [n for n in NEWS if n["gebied"] == slug][:3]
+    rel = [n for n in NEWS if n["gebied"] == slug][:2]
     calc = f'''<section class="calc-top"><div class="container"><div class="calc-wrap">{p["extra"]}</div></div></section>''' if p["extra"] else ""
     body = f'''{hero_page(trail, name, p["h1"], p["lead"])}
 {calc}
@@ -684,8 +715,8 @@ def build_area(slug):
   <div class="container">
     <div class="section-head"><span class="eyebrow">Nieuws</span><h2>Actueel in het {name.lower()}</h2></div>
     {LEGEND}
-    <div class="news-list news-list--home">{"".join(news_card(n, link=True) for n in rel)}</div>
-    <p style="margin-top:28px"><a class="btn btn--outline" href="nieuws.html?gebied={slug}">Al het nieuws over {name.lower()}</a></p>
+    <div class="news-list">{"".join(news_card(n) for n in rel)}</div>
+    <p style="margin-top:28px"><a class="btn btn--outline" href="nieuws.html?gebied={slug}">Al het nieuws over {name.lower()}</a> <a class="btn btn--outline" href="nieuws.html">Alle nieuwsberichten</a></p>
   </div>
 </section>
 {cta_band()}'''
@@ -714,21 +745,61 @@ def build_news():
       <div class="group" role="group" aria-label="Rechtsgebied">{chips_area}</div>
       <div class="group" role="group" aria-label="Onderwerp">{chips_thema}</div>
     </div>
-    <div class="news-list" data-news-list>{"".join(news_card(n, heading="h2") for n in items)}</div>
+    <div class="news-list" data-news-list>{"".join(news_card(n, heading="h2", anchor=True) for n in items)}</div>
     <p data-news-empty hidden>Er zijn geen berichten voor deze selectie.</p>
     {DISCLAIMER}
   </div>
 </section>
 {cta_band()}'''
-    arts = [{"@type": "Article", "headline": n["title"], "description": n["text"], "datePublished": TODAY, "dateModified": TODAY,
-             "inLanguage": "nl-NL", "url": f'{SITE}/nieuws.html#{n["id"]}', "image": SITE + "/assets/img/og-image.jpg",
-             "about": AREA_NAME[n["gebied"]], "author": {"@id": ORG_ID}, "publisher": {"@id": ORG_ID}} for n in items]
+    arts = [{"@type": "NewsArticle", "headline": n["title"], "url": f'{SITE}/{news_url(n)}'} for n in items]
     lst = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Juridisch nieuws", "url": SITE + "/nieuws.html",
            "inLanguage": "nl-NL", "mainEntity": {"@type": "ItemList", "itemListElement": [
                {"@type": "ListItem", "position": i + 1, "item": a} for i, a in enumerate(arts)]}}
-    page("nieuws.html", "Juridisch nieuws in begrijpelijke taal | Law & Research",
-         "Praktisch nieuws over rechtspraak en nieuwe wetten in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Steeds met de vraag: wat betekent dit voor u?",
+    page("nieuws.html", "Juridisch nieuws in gewone taal | Law & Research",
+         "Alle nieuwsberichten over uitspraken en nieuwe wetten in bestuurs-, arbeids-, contracten- en vastgoedrecht. Steeds met: wat betekent dit voor u?",
          body, ld=(ORG, lst, breadcrumb_ld(trail)))
+    for n in items:
+        build_article(n)
+
+def build_article(n):
+    """Eigen pagina per nieuwsbericht: nieuws/<id>.html."""
+    fname = news_url(n)
+    gebied = n["gebied"]
+    trail = [("index.html", "Home"), ("nieuws.html", "Nieuws"), (fname, n["title"])]
+    label = "Rechtspraak" if n["type"] == "jurisprudentie" else "Wet- en regelgeving"
+    bullets = "".join(f"<li>{html.escape(b)}</li>" for b in n["foryou"])
+    related = [x for x in NEWS if x["gebied"] == gebied and x["id"] != n["id"]][:2]
+    published = n.get("published", FIRST_PUBLISHED)
+    body = f'''{hero_page(trail, f"{label} · {AREA_NAME[gebied]}", html.escape(n["title"]), html.escape(n["datelabel"]))}
+<section class="section">
+  <div class="container layout-aside">
+    <article class="prose news-article">
+      {news_labels(n)}
+      <p class="lead">{html.escape(n["text"])}</p>
+      <div class="for-you"><strong>Wat betekent dit voor u?</strong><ul>{bullets}</ul></div>
+      <p class="news-source">Bron: <a href="{n["url"]}" rel="noopener" target="_blank">{html.escape(n["source"])}</a></p>
+      {DISCLAIMER}
+      <p><a class="more" href="nieuws.html">Alle nieuwsberichten</a> · <a class="more" href="{gebied}.html">Meer over {AREA_NAME[gebied].lower()}</a></p>
+    </article>
+    {contact_aside(gebied)}
+  </div>
+</section>
+<section class="section section--tint">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Nieuws</span><h2>Meer over {AREA_NAME[gebied].lower()}</h2></div>
+    <div class="news-list">{"".join(news_card(x) for x in related)}</div>
+  </div>
+</section>
+{cta_band()}'''
+    art = {"@context": "https://schema.org", "@type": "NewsArticle", "headline": n["title"][:110], "description": n["text"],
+           "datePublished": published, "dateModified": n.get("modified", published), "inLanguage": "nl-NL",
+           "mainEntityOfPage": f"{SITE}/{fname}", "url": f"{SITE}/{fname}", "image": SITE + "/assets/img/og-image.jpg",
+           "articleSection": AREA_NAME[gebied], "author": {"@id": ORG_ID}, "publisher": {"@id": ORG_ID},
+           "citation": n["url"], "about": {"@type": "Thing", "name": n["source"]}}
+    extra = f'<meta property="article:published_time" content="{published}">\n<meta property="article:section" content="{AREA_NAME[gebied]}">\n'
+    title = n["title"] + " | Law & Research" if len(n["title"]) <= 48 else n["title"]
+    page(fname, title, short(n["text"]), body,
+         ld=(ORG, art, breadcrumb_ld(trail)), og_type="article", extra_head=extra)
 
 # ---------- research ----------
 def build_research():
@@ -806,8 +877,8 @@ def build_research():
 </section>'''
     ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Research", "url": SITE + "/research.html",
           "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}, "isAccessibleForFree": False}
-    page("research.html", "Juridisch onderzoek en publicaties | Research | Law & Research",
-         "Juridische analyses, jurisprudentieoverzichten en checklists over bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Vraag toegang aan bij Law & Research.",
+    page("research.html", "Juridisch onderzoek en publicaties | Law & Research",
+         "Juridische analyses, jurisprudentieoverzichten en checklists over bestuurs-, arbeids-, contracten- en vastgoedrecht. Vraag toegang aan.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- over ons ----------
@@ -879,7 +950,7 @@ def build_contact():
     ld = {"@context": "https://schema.org", "@type": "ContactPage", "name": "Contact", "url": SITE + "/contact.html",
           "inLanguage": "nl-NL", "about": {"@id": ORG_ID}}
     page("contact.html", "Contact | Law & Research",
-         "Neem contact op met Law & Research voor advies in bestuursrecht, arbeidsrecht, contractenrecht of vastgoedrecht. Mail naar info@law-research.nl of gebruik het contactformulier.",
+         "Stel uw juridische vraag aan Law & Research via het contactformulier of info@law-research.nl. Wij reageren meestal binnen één werkdag.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- privacy ----------
@@ -912,7 +983,7 @@ def build_privacy():
   </div>
 </section>'''
     page("privacy.html", "Privacyverklaring en disclaimer | Law & Research",
-         "Privacyverklaring, disclaimer en kantoorgegevens van Law & Research.",
+         "Lees hoe Law & Research met uw persoonsgegevens omgaat, wat u van de informatie op deze website kunt verwachten en wat onze kantoorgegevens zijn.",
          body, ld=(breadcrumb_ld(trail),))
 
 def build_404():
@@ -934,6 +1005,7 @@ def build_meta():
     pages = [("", "1.0", "weekly"), ("bestuursrecht.html", "0.9", "monthly"), ("arbeidsrecht.html", "0.9", "monthly"),
              ("contractenrecht.html", "0.9", "monthly"), ("vastgoedrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("research.html", "0.6", "monthly"),
              ("over-ons.html", "0.6", "yearly"), ("contact.html", "0.7", "yearly"), ("privacy.html", "0.2", "yearly")]
+    pages += [(news_url(n), "0.7", "yearly") for n in NEWS]
     urls = "".join(f"  <url><loc>{SITE}/{u}</loc><lastmod>{TODAY}</lastmod><changefreq>{c}</changefreq><priority>{p}</priority></url>\n" for u, p, c in pages)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /404.html\n\nSitemap: {SITE}/sitemap.xml\n", encoding="utf-8")
