@@ -107,7 +107,7 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       if (form.action.indexOf("JOUW_FORM_ID") !== -1) {
-        show("Dit formulier is nog niet gekoppeld. Mail ons zolang rechtstreeks via blokland@law-research.nl.", false);
+        show("Dit formulier is nog niet gekoppeld. Mail ons zolang rechtstreeks via info@law-research.nl.", false);
         return;
       }
       if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -121,7 +121,7 @@
           show(form.dataset.success || "Bedankt! Uw bericht is verzonden. Wij nemen zo snel mogelijk contact met u op.", true);
         })
         .catch(function () {
-          show("Het verzenden is niet gelukt. Probeer het opnieuw of mail naar blokland@law-research.nl.", false);
+          show("Het verzenden is niet gelukt. Probeer het opnieuw of mail naar info@law-research.nl.", false);
         })
         .then(function () { btn.disabled = false; btn.textContent = label; });
     });

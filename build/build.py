@@ -5,7 +5,7 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1])
 SITE = "https://law-research.nl"
-EMAIL = "blokland@law-research.nl"
+EMAIL = "info@law-research.nl"
 FORM = "https://formspree.io/f/JOUW_FORM_ID"
 TODAY = "2026-10-13"
 ORG_ID = SITE + "/#organisatie"
@@ -851,7 +851,7 @@ def build_contact():
     ld = {"@context": "https://schema.org", "@type": "ContactPage", "name": "Contact", "url": SITE + "/contact.html",
           "inLanguage": "nl-NL", "about": {"@id": ORG_ID}}
     page("contact.html", "Contact | Law & Research",
-         "Neem contact op met Law & Research voor advies in bestuursrecht, arbeidsrecht, contractenrecht of vastgoedrecht. Mail naar blokland@law-research.nl of gebruik het contactformulier.",
+         "Neem contact op met Law & Research voor advies in bestuursrecht, arbeidsrecht, contractenrecht of vastgoedrecht. Mail naar info@law-research.nl of gebruik het contactformulier.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- privacy ----------
