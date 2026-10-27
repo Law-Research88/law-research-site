@@ -127,6 +127,7 @@ NEWS = [
 ]
 
 from news_extra import EXTRA
+from current_research import CURRENT
 NEWS += EXTRA
 for _n in NEWS:
     _n.setdefault("thema", [])
@@ -599,6 +600,22 @@ AREA_PAGES = {
  ),
 }
 
+def current_html(slug):
+    c = CURRENT.get(slug)
+    if not c:
+        return ""
+    src = "".join(f'<li><a href="{html.escape(u)}" rel="noopener" target="_blank">{html.escape(t)}</a></li>' for t, u in c["sources"])
+    return f'''<section class="current-research" id="actueel-onderzoek" aria-labelledby="ao-{slug}">
+<span class="eyebrow">Actueel onderzoek</span>
+<h2 id="ao-{slug}">{html.escape(c["title"])}</h2>
+<div class="compare">
+  <div><h3>Nederland</h3><p>{html.escape(c["nl"])}</p></div>
+  <div><h3>Verenigd Koninkrijk</h3><p>{html.escape(c["uk"])}</p></div>
+</div>
+<p><strong>Waarom dit ertoe doet:</strong> {html.escape(c["why"])}</p>
+<p class="news-source">Bronnen:</p><ul class="ref-list">{src}</ul>
+</section>'''
+
 def refs_html(refs):
     if not refs:
         return ""
@@ -629,6 +646,7 @@ def build_area(slug):
       {p["extra"]}
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
+      {current_html(slug)}
       {refs_html(p.get("refs", []))}
     </div>
     {contact_aside(slug)}
@@ -702,7 +720,19 @@ def build_research():
   <p class="blur" aria-hidden="true">Samenvatting, conclusies en bronnen zijn beschikbaar na goedkeuring van uw aanvraag.</p>
 </article>''' for t, a, d in locked)
     opts = "".join(f'<label class="consent"><input type="checkbox" name="interesse" value="{n}"> {n}</label>' for _, n, _, _ in AREAS)
+    current_cards = "".join(f'''<article class="card reveal"><span class="icon-badge">{ICON[i]}</span>
+  <p style="font-size:.9rem;color:var(--navy-600);font-weight:600">{n}</p>
+  <h3>{html.escape(CURRENT[a]["title"])}</h3>
+  <p>{html.escape(CURRENT[a]["nl"].split(". ")[0])}. En in het Verenigd Koninkrijk?</p>
+  <a class="more" href="{a}.html#actueel-onderzoek">Lees de vergelijking</a></article>''' for a, n, i, _ in AREAS if a in CURRENT)
     body = f'''{hero_page(trail, "Research", "Juridisch onderzoek, op aanvraag beschikbaar", "Naast onze rechtsbijstand doen wij juridisch onderzoek. Analyses, jurisprudentieoverzichten en checklists stellen wij beschikbaar voor professionals, organisaties en studenten. Vraag hieronder toegang aan.")}
+<section class="section section--tint">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Actueel onderzoek</span><h2>Nederland en het Verenigd Koninkrijk vergeleken</h2>
+      <p class="lead">Hoe lossen andere landen dezelfde juridische vragen op? Per rechtsgebied zetten wij een actuele ontwikkeling in breder perspectief.</p></div>
+    <div class="grid-4">{current_cards}</div>
+  </div>
+</section>
 <section class="section">
   <div class="container">
     <div class="section-head"><span class="eyebrow">Publicaties</span><h2>Beschikbaar na goedkeuring</h2>
