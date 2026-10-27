@@ -232,6 +232,7 @@ FOOTER = f'''<footer class="site-footer">
         <ul>
           <li><a href="nieuws.html">Nieuws</a></li>
           <li><a href="research.html">Research</a></li>
+          <li><a href="pro-forma-bezwaarschrift.html">Pro forma bezwaarschrift</a></li>
           <li><a href="over-ons.html">Over ons</a></li>
           <li><a href="privacy.html">Privacy &amp; disclaimer</a></li>
         </ul>
@@ -538,10 +539,11 @@ AREA_PAGES = {
   <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (bekendmaking)</label><input type="date" id="besluitdatum"></div>
   <div class="tool-result" aria-live="polite" hidden></div>
   <p class="disclaimer">Indicatie op basis van art. 6:7 en 6:8 Awb en de Algemene termijnenwet. Soms geldt een andere termijn; die staat dan onder het besluit. Twijfelt u? Neem contact op.</p>
-</div>''',
+</div>
+<p><a class="btn btn--primary" href="pro-forma-bezwaarschrift.html">Pro forma bezwaarschrift invullen en downloaden</a></p>''',
   faqs=[("Hoe lang heb ik om bezwaar te maken?", "Meestal zes weken, gerekend vanaf de dag na de dag waarop het besluit is bekendgemaakt. Valt de laatste dag in een weekend of op een feestdag, dan schuift de termijn op naar de eerstvolgende werkdag."),
         ("Wat gebeurt er als ik te laat ben?", "Een te laat bezwaar wordt meestal niet-ontvankelijk verklaard. Dan wordt er niet meer inhoudelijk naar gekeken. Alleen in uitzonderlijke situaties wordt een termijnoverschrijding verschoonbaar geacht. Reageer daarom altijd op tijd, desnoods met een kort 'pro forma' bezwaar."),
-        ("Wat is een pro forma bezwaar?", "Een kort bezwaarschrift om de termijn veilig te stellen, waarin u aangeeft dat de gronden (de inhoudelijke argumenten) later volgen. U krijgt dan meestal een extra termijn om het bezwaar aan te vullen."),
+        ("Wat is een pro forma bezwaar?", "Een kort bezwaarschrift om de termijn veilig te stellen, waarin u aangeeft dat de gronden (de inhoudelijke argumenten) later volgen. U krijgt dan meestal een extra termijn om het bezwaar aan te vullen. Op onze website kunt u gratis een pro forma bezwaarschrift invullen en downloaden."),
         ("Kan ik een vergoeding krijgen voor de kosten?", "Wordt het besluit in bezwaar of beroep herroepen omdat het onrechtmatig was, dan kunt u een vergoeding van proceskosten vragen. Een rechtsbijstandsverzekering kan de kosten soms ook dekken."),
         ("Hoe maak ik bezwaar tegen de WOZ-waarde?", "Maak binnen zes weken na de datum op de aanslag bezwaar bij uw gemeente. Dat is gratis en kan meestal online. Vraag eerst het taxatieverslag op en vergelijk de woningen waarmee uw huis is vergeleken. Wijst u op verschillen in grootte, staat of ligging, dan heeft uw bezwaar meer kans."),
         ("Kan ik bezwaar maken tegen een verkeersboete?", "Ja. Tegen een verkeersboete van het CJIB (Wet Mulder) stelt u binnen zes weken na de datum van de beschikking beroep in bij de officier van justitie. Meestal moet u het boetebedrag eerst als zekerheid betalen. Krijgt u gelijk, dan krijgt u het terug. Bent u het daarna nog niet eens, dan kunt u naar de kantonrechter."),
@@ -881,6 +883,106 @@ def build_research():
          "Juridische analyses, jurisprudentieoverzichten en checklists over bestuurs-, arbeids-, contracten- en vastgoedrecht. Vraag toegang aan.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
+# ---------- pro forma bezwaarschrift ----------
+BEZWAAR_FAQ = [
+    ("Wat is een pro forma bezwaarschrift?", "Een kort bezwaarschrift waarmee u op tijd laat weten dat u het niet eens bent met een besluit. U schrijft erbij dat de gronden (uw inhoudelijke argumenten) later volgen. Zo stelt u de bezwaartermijn van zes weken veilig, ook als u nog geen tijd heeft gehad voor een goede onderbouwing."),
+    ("Moet ik mijn bezwaarschrift ondertekenen?", "Ja. Een bezwaarschrift op papier moet u met de hand ondertekenen (art. 6:5 Awb). Vergeet u dat, dan moet de instantie u eerst de kans geven het te herstellen (art. 6:6 Awb), maar reken daar niet op. Dient u het bezwaar online in via een formulier waarop u inlogt met DigiD of eHerkenning, dan vervangt die inlog uw handtekening."),
+    ("Kan ik bezwaar maken per e-mail?", "Alleen als de instantie dat zelf mogelijk maakt. Sinds 1 januari 2026 moeten overheden digitaal bereikbaar zijn, maar zij bepalen zelf via welk kanaal. Meestal is dat een webformulier met DigiD, en vaak juist niet e-mail. Kijk onder het besluit of op de website van de instantie. Twijfelt u, stuur het bezwaar dan per post, liefst aangetekend."),
+    ("Wanneer ben ik op tijd?", "U bent op tijd als het bezwaarschrift binnen zes weken na de datum van het besluit is ontvangen. Bij verzending per post bent u ook op tijd als u het vóór het einde van de termijn op de post doet en de instantie het binnen een week daarna ontvangt (art. 6:9 Awb). Bewaar daarom altijd een bewijs van verzending en een kopie."),
+    ("Kan ik dit formulier voor elke zaak gebruiken?", "Voor bezwaar tegen een besluit van een overheidsinstantie, zoals de gemeente, het UWV, de SVB, de Belastingdienst, Dienst Toeslagen of DUO. Niet voor een verkeersboete van het CJIB: daarvoor stelt u beroep in bij de officier van justitie. Ook niet voor geschillen met een werkgever of verhuurder; daar gelden andere regels."),
+]
+
+def build_bezwaar():
+    fname = "pro-forma-bezwaarschrift.html"
+    trail = [("index.html", "Home"), ("bestuursrecht.html", "Bestuursrecht"), (fname, "Pro forma bezwaarschrift")]
+    def field(name, label, req=True, typ="text", hint="", auto=""):
+        star = ' <span class="req" aria-hidden="true">*</span>' if req else ' <span class="opt">(optioneel)</span>'
+        r = " required" if req else ""
+        h = f'<small class="hint">{hint}</small>' if hint else ""
+        a = f' autocomplete="{auto}"' if auto else ""
+        return f'<div class="field"><label for="bz-{name}">{label}{star}</label><input id="bz-{name}" name="{name}" type="{typ}"{r}{a}>{h}</div>'
+    body = f'''{hero_page(trail, "Stel uw termijn veilig", "Pro forma bezwaarschrift: gratis invullen en downloaden", "Bent u het niet eens met een besluit van de overheid, maar heeft u nog geen tijd voor een goede onderbouwing? Met een pro forma bezwaarschrift stelt u de termijn van zes weken veilig. Vul het formulier in, download de brief in Word of PDF, onderteken hem en verstuur hem op tijd.")}
+<section class="section">
+  <div class="container">
+    <ol class="steps">
+      <li><strong>Vul de gegevens in.</strong> Velden met <span class="req">*</span> zijn verplicht.</li>
+      <li><strong>Download de brief</strong> in Word of PDF.</li>
+      <li><strong>Onderteken uw bezwaar</strong> en voeg een kopie van het besluit toe.</li>
+      <li><strong>Verstuur het binnen zes weken</strong> en bewaar een bewijs van verzending.</li>
+    </ol>
+    <div class="bezwaar-grid">
+      <form class="form" id="bezwaar-form" novalidate>
+        <p class="privacy-note">{ICON["lock"]} Uw gegevens blijven op uw eigen apparaat. Er wordt niets naar ons of anderen verstuurd.</p>
+        <fieldset><legend>Uw gegevens</legend>
+          {field("naam", "Naam", auto="name")}
+          {field("adres", "Straat en huisnummer", auto="street-address")}
+          {field("postcode_plaats", "Postcode en woonplaats", hint="Bijvoorbeeld: 1234 AB Utrecht")}
+          {field("contact", "Telefoon of e-mail", req=False, hint="Handig, zodat de instantie u snel kan bereiken")}
+        </fieldset>
+        <fieldset><legend>Het besluit</legend>
+          {field("ontvanger", "Naar wie stuurt u het bezwaar?", hint="De instantie die het besluit nam, bijvoorbeeld: College van burgemeester en wethouders van Utrecht, of UWV")}
+          {field("ontvanger_adres", "Adres van de instantie", hint="Staat meestal onder het besluit, vaak een postbusnummer")}
+          {field("besluit_datum", "Datum van het besluit", typ="date")}
+          {field("kenmerk", "Kenmerk of zaaknummer van het besluit", hint="Staat bovenaan de brief, bijvoorbeeld bij 'ons kenmerk'")}
+          {field("onderwerp", "Waar gaat het besluit over?", hint="Bijvoorbeeld: de terugvordering van mijn huurtoeslag over 2025")}
+          <div class="field"><label for="bz-reden">Waarom bent u het niet eens? <span class="opt">(optioneel)</span></label><textarea id="bz-reden" name="reden" rows="3" placeholder="Eén of twee zinnen is genoeg. De volledige onderbouwing stuurt u later."></textarea></div>
+          <p class="deadline" id="bezwaar-deadline" aria-live="polite" hidden></p>
+        </fieldset>
+        <fieldset><legend>Ondertekening en verzoeken</legend>
+          {field("plaats", "Plaats van ondertekening")}
+          {field("datum", "Datum van uw brief", typ="date")}
+          <label class="consent"><input type="checkbox" name="horen" checked> <span>Ik wil worden gehoord over mijn bezwaar (hoorzitting).</span></label>
+          <label class="consent"><input type="checkbox" name="stukken" checked> <span>Ik vraag een kopie van alle stukken over het besluit.</span></label>
+        </fieldset>
+        <div class="form-status" id="bezwaar-status" role="status" aria-live="polite" hidden></div>
+        <div class="download-row">
+          <button class="btn btn--primary" type="button" id="download-docx">Download in Word</button>
+          <button class="btn btn--outline" type="button" id="download-pdf">Download als PDF</button>
+        </div>
+      </form>
+      <div class="letter-wrap">
+        <h2 class="h3">Voorbeeld van uw brief</h2>
+        <div class="letter" id="bezwaar-preview" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section section--tint">
+  <div class="container grid-2">
+    <div class="for-you"><strong>Onderteken uw bezwaar</strong>
+      <ul>
+        <li>Op papier: zet uw handtekening onder de brief. Zonder handtekening is het bezwaar niet compleet.</li>
+        <li>Online via een formulier van de instantie met DigiD of eHerkenning: dan is een handtekening niet nodig, want de inlog telt als ondertekening. Gebruik de tekst uit deze brief in dat formulier.</li>
+        <li>Per e-mail: alleen als de instantie dat uitdrukkelijk toestaat. Veel instanties accepteren geen bezwaar per e-mail.</li>
+      </ul>
+    </div>
+    <div class="for-you"><strong>Stel uw termijn veilig</strong>
+      <ul>
+        <li>De termijn is zes weken en begint op de dag na de datum van het besluit.</li>
+        <li>Stuur per post liefst aangetekend, of lever de brief af en vraag om een ontvangstbevestiging.</li>
+        <li>Bewaar een kopie van de brief en het bewijs van verzending.</li>
+        <li>Stuur de gronden zo snel mogelijk na, in elk geval vóór de datum die de instantie u geeft.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container layout-aside">
+    <div class="prose">
+      <h2>Veelgestelde vragen over een pro forma bezwaar</h2>
+      {faq_html(BEZWAAR_FAQ)}
+      <p class="disclaimer">Dit voorbeeld is algemene informatie en geen juridisch advies. Soms gelden andere termijnen of regels; die staan dan onder het besluit. Wilt u dat wij de gronden van uw bezwaar voor u schrijven? <a href="contact.html?onderwerp=bestuursrecht">Neem contact op</a>.</p>
+    </div>
+    {contact_aside("bestuursrecht")}
+  </div>
+</section>
+<script src="assets/js/bezwaar.js" defer></script>'''
+    ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Pro forma bezwaarschrift", "url": f"{SITE}/{fname}",
+          "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}, "isAccessibleForFree": True}
+    page(fname, "Pro forma bezwaarschrift: gratis voorbeeld | Law & Research",
+         "Gratis pro forma bezwaarschrift invullen en downloaden in Word of PDF. Stel de bezwaartermijn van zes weken veilig. Met de verplichte onderdelen en uitleg.",
+         body, ld=(ORG, ld, breadcrumb_ld(trail), faq_ld(BEZWAAR_FAQ)))
+
 # ---------- over ons ----------
 def build_about():
     trail = [("index.html", "Home"), ("over-ons.html", "Over ons")]
@@ -997,12 +1099,12 @@ def build_404():
     p = OUT / "404.html"
     t = p.read_text(encoding="utf-8")
     for a in ('href="assets/', 'src="assets/', 'href="index.html', 'href="nieuws.html', 'href="research.html', 'href="over-ons.html',
-              'href="contact.html', 'href="privacy.html', 'href="bestuursrecht.html', 'href="arbeidsrecht.html', 'href="contractenrecht.html', 'href="vastgoedrecht.html'):
+              'href="contact.html', 'href="privacy.html', 'href="bestuursrecht.html', 'href="arbeidsrecht.html', 'href="contractenrecht.html', 'href="vastgoedrecht.html', 'href="pro-forma-bezwaarschrift.html'):
         t = t.replace(a, a.replace('="', '="/'))
     p.write_text(t, encoding="utf-8")
 
 def build_meta():
-    pages = [("", "1.0", "weekly"), ("bestuursrecht.html", "0.9", "monthly"), ("arbeidsrecht.html", "0.9", "monthly"),
+    pages = [("", "1.0", "weekly"), ("bestuursrecht.html", "0.9", "monthly"), ("pro-forma-bezwaarschrift.html", "0.8", "monthly"), ("arbeidsrecht.html", "0.9", "monthly"),
              ("contractenrecht.html", "0.9", "monthly"), ("vastgoedrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("research.html", "0.6", "monthly"),
              ("over-ons.html", "0.6", "yearly"), ("contact.html", "0.7", "yearly"), ("privacy.html", "0.2", "yearly")]
     pages += [(news_url(n), "0.7", "yearly") for n in NEWS]
@@ -1019,5 +1121,5 @@ if __name__ == "__main__":
     build_home()
     for a, _, _, _ in AREAS:
         build_area(a)
-    build_news(); build_research(); build_about(); build_contact(); build_privacy(); build_404(); build_meta()
+    build_news(); build_bezwaar(); build_research(); build_about(); build_contact(); build_privacy(); build_404(); build_meta()
     print("ok")
