@@ -422,7 +422,7 @@ def build_home():
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Rechtsgebieden</span>
-      <h2>Gespecialiseerd in uw rechtsgebied</h2>
+      <h2>Gespecialiseerd in</h2>
       <p class="lead">Wij richten ons bewust op een beperkt aantal rechtsgebieden. Zo kennen we de regels, de rechtspraak en de praktijk door en door.</p>
     </div>
     <div class="grid-4">
@@ -842,7 +842,7 @@ def build_about():
 <section class="section section--navy">
   <div class="container">
     <span class="eyebrow">Rechtsgebieden</span>
-    <h2>Gespecialiseerd in uw rechtsgebied</h2>
+    <h2>Gespecialiseerd in</h2>
     <div class="stats">
       <div><strong><a href="bestuursrecht.html" style="color:inherit">Bestuursrecht</a></strong>Bezwaar en beroep tegen de overheid</div>
       <div><strong><a href="arbeidsrecht.html" style="color:inherit">Arbeidsrecht</a></strong>Voor werknemers en werkgevers</div>
