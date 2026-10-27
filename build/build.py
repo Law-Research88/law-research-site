@@ -396,6 +396,7 @@ def build_home():
       <a class="btn btn--ghost" href="#rechtsgebieden">Bekijk rechtsgebieden</a>
     </div>
     <p class="hero-note">Weten wat wij doen, is uw goed recht.</p>
+    <img class="hero-illustration" src="assets/img/weegschaal.svg" alt="" width="400" height="400">
   </div>
 </section>
 
@@ -801,6 +802,7 @@ def build_about():
       </ul>
     </div>
     <div class="reveal">
+      <img class="illustration" src="assets/img/vrouwe-justitia.svg" alt="Vrouwe Justitia met weegschaal en zwaard" width="320" height="440" loading="lazy">
       <div class="card">
         <h3>Stage bij Law &amp; Research</h3>
         <p>Ben je masterstudent rechten met een specialisatie in arbeidsrecht, bestuursrecht, contractenrecht of vastgoedrecht? Wij bieden een leerzame praktijkstage van acht weken, met meewerken aan lopende zaken en het bijwonen van zittingen.</p>

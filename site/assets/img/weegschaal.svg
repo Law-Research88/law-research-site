@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <title>Weegschaal</title>
+  <g stroke="#e6edf4" stroke-width="5">
+    <!-- zuil en voet -->
+    <path d="M200 70 V330"/>
+    <path d="M150 352 H250 M130 368 H270"/>
+    <path d="M170 352 C180 340 190 334 200 330 C210 334 220 340 230 352"/>
+    <!-- balk -->
+    <path d="M70 110 C130 98 270 98 330 110"/>
+    <!-- kettingen -->
+    <path d="M70 110 L40 220 M70 110 L100 220"/>
+    <path d="M330 110 L300 220 M330 110 L360 220"/>
+    <!-- schalen -->
+    <path d="M28 220 H112 C108 250 90 262 70 262 C50 262 32 250 28 220 Z"/>
+    <path d="M288 220 H372 C368 250 350 262 330 262 C310 262 292 250 288 220 Z"/>
+  </g>
+  <g stroke="#c9a961" stroke-width="5">
+    <circle cx="200" cy="56" r="14"/>
+    <circle cx="200" cy="104" r="7" fill="#c9a961"/>
+    <circle cx="70" cy="110" r="5" fill="#c9a961"/>
+    <circle cx="330" cy="110" r="5" fill="#c9a961"/>
+  </g>
+</svg>
