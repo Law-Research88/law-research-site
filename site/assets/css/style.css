@@ -350,3 +350,7 @@ p { margin: 0 0 1em; }
 .termijn p { margin: 0; color: var(--ink); max-width: 70ch; }
 .termijn strong { color: var(--navy-800); }
 .termijn .btn { padding: .65em 1.3em; }
+/* Rekenhulp bovenaan */
+.calc-top { background: var(--navy-50); padding: clamp(36px, 5vw, 56px) 0; }
+.calc-wrap { max-width: 760px; }
+.calc-wrap h2 { margin-bottom: .4em; }

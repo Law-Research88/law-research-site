@@ -512,10 +512,10 @@ AREA_PAGES = {
 <li>Bezwaar en beroep bij de rechtbank en de Raad van State</li>
 </ul>
 <p>Veel ondernemers ervaren wet- en regelgeving als een jungle. Wij helpen u de weg te vinden.</p>''',
-  extra='''<h2>Rekenhulp: tot wanneer kunt u bezwaar maken?</h2>
-<p>De termijn voor bezwaar is meestal <strong>zes weken</strong>. Die begint op de dag na de dag waarop het besluit is bekendgemaakt (meestal de datum van de brief).</p>
+  extra='''<h2>Rekenhulp: tot wanneer kunt u bezwaar maken of beroep instellen?</h2>
+<p>De termijn voor bezwaar en voor beroep bij de rechtbank is meestal <strong>zes weken</strong>. Die begint op de dag na de dag waarop het besluit of de beslissing op bezwaar is bekendgemaakt (meestal de datum van de brief).</p>
 <div class="tool" id="bezwaar-calc">
-  <div class="field"><label for="besluitdatum">Datum van het besluit (bekendmaking)</label><input type="date" id="besluitdatum"></div>
+  <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (bekendmaking)</label><input type="date" id="besluitdatum"></div>
   <div class="tool-result" aria-live="polite" hidden></div>
   <p class="disclaimer">Indicatie op basis van art. 6:7 en 6:8 Awb en de Algemene termijnenwet. Soms geldt een andere termijn; die staat dan onder het besluit. Twijfelt u? Neem contact op.</p>
 </div>''',
@@ -642,7 +642,9 @@ def build_area(slug):
     icon = dict((a, i) for a, _, i, _ in AREAS)[slug]
     trail = [("index.html", "Home"), (slug + ".html", name)]
     rel = [n for n in NEWS if n["gebied"] == slug][:3]
+    calc = f'''<section class="calc-top"><div class="container"><div class="calc-wrap">{p["extra"]}</div></div></section>''' if p["extra"] else ""
     body = f'''{hero_page(trail, name, p["h1"], p["lead"])}
+{calc}
 {termijn_strip()}
 <section class="section">
   <div class="container layout-aside">
@@ -656,7 +658,6 @@ def build_area(slug):
         <div class="tab-panel" id="tab-part"><h3>Voor particulieren</h3>{p["particulier"]}</div>
         <div class="tab-panel" id="tab-ond" hidden><h3>Voor ondernemers</h3>{p["ondernemer"]}</div>
       </div>
-      {p["extra"]}
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
       {current_html(slug)}

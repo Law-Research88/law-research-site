@@ -160,9 +160,9 @@
       var end = plus(start, 42); // termijn begint de dag na bekendmaking en duurt zes weken
       var moved = false;
       while (isFree(end)) { end = plus(end, 1); moved = true; }
-      out.innerHTML = "<small>Uw bezwaar moet uiterlijk binnen zijn op</small><strong>" + fmt.format(end) +
+      out.innerHTML = "<small>Uw bezwaar- of beroepschrift moet uiterlijk binnen zijn op</small><strong>" + fmt.format(end) +
         "</strong><small>" + (moved ? "De termijn eindigde in een weekend of op een feestdag en schuift daarom op naar de eerstvolgende werkdag. " : "") +
-        "Wacht niet tot de laatste dag: stuur uw bezwaar liefst aangetekend of via het officiële digitale loket.</small>";
+        "Wacht niet tot de laatste dag: stuur het liefst aangetekend of via het officiële digitale loket.</small>";
       out.hidden = false;
     };
     input.addEventListener("change", run);
