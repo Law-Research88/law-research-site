@@ -7,3 +7,4 @@ Static website for Law & Research. Netlify publishes the `site/` folder (see `ne
 - `build/news_extra.py`: the news items. Add new items here and rebuild.
 
 News items are published only after the owner approves them.
+- `build/modellen.py`: own model documents and letters. Each has a `status`: `download` (Word file published in `site/modellen/`), `aanvraag` (listed, request form only, file not published) or `verborgen`. Rebuild after changing.
