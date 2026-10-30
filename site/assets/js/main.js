@@ -95,6 +95,32 @@
     });
   });
 
+  /* Modellen: filter en aanvraagknop */
+  var mlist = document.querySelector("[data-model-list]");
+  if (mlist) {
+    var mchips = document.querySelectorAll("[data-model-filter]");
+    var mapply = function (v) {
+      mlist.querySelectorAll(".model-card").forEach(function (c) {
+        c.hidden = !(v === "alle" || c.dataset.gebied === v || c.dataset.status === v);
+      });
+      mchips.forEach(function (ch) { ch.setAttribute("aria-pressed", ch.dataset.modelFilter === v ? "true" : "false"); });
+    };
+    mchips.forEach(function (ch) { ch.addEventListener("click", function () { mapply(ch.dataset.modelFilter); }); });
+    mapply("alle");
+    var msel = document.getElementById("m-model");
+    var pick = function (slug) {
+      if (!msel) return;
+      for (var i = 0; i < msel.options.length; i++) {
+        if (msel.options[i].dataset.slug === slug) { msel.selectedIndex = i; break; }
+      }
+    };
+    document.querySelectorAll("[data-vraag-model]").forEach(function (a) {
+      a.addEventListener("click", function () { pick(a.dataset.vraagModel); });
+    });
+    var qm = new URLSearchParams(location.search).get("model");
+    if (qm) pick(qm);
+  }
+
   /* Formulieren via Formspree (werkt op elke statische hosting) */
   document.querySelectorAll("form[data-form]").forEach(function (form) {
     var status = form.querySelector(".form-status");

@@ -129,6 +129,8 @@ NEWS = [
 from news_extra import EXTRA
 from current_research import CURRENT
 from references import REFS
+from modellen import MODELLEN, GEBIEDEN, VERSIE
+from modellen_docx import make_docx, bestandsnaam
 NEWS += EXTRA
 for _n in NEWS:
     _n.setdefault("thema", [])
@@ -176,7 +178,7 @@ DISCLAIMER = '<p class="disclaimer">Deze berichten geven algemene informatie in 
 
 # ---------- layout ----------
 NAV = [("index.html", "Home"), ("__areas__", "Rechtsgebieden"), ("nieuws.html", "Nieuws"),
-       ("research.html", "Research"), ("over-ons.html", "Over ons")]
+       ("modellen.html", "Modellen"), ("research.html", "Research"), ("over-ons.html", "Over ons")]
 
 def header(current):
     items = []
@@ -216,6 +218,7 @@ FOOTER = f'''<footer class="site-footer">
         <h3>Kantoor</h3>
         <ul>
           <li><a href="nieuws.html">Nieuws</a></li>
+          <li><a href="modellen.html">Modellen</a></li>
           <li><a href="research.html">Research</a></li>
           <li><a href="over-ons.html">Over ons</a></li>
           <li><a href="privacy.html">Privacy &amp; disclaimer</a></li>
@@ -730,6 +733,92 @@ def build_news():
          "Praktisch nieuws over rechtspraak en nieuwe wetten in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht. Steeds met de vraag: wat betekent dit voor u?",
          body, ld=(ORG, lst, breadcrumb_ld(trail)))
 
+# ---------- modellen ----------
+MODEL_ICON = {"arbeidsrecht": "arbeid", "bestuursrecht": "bestuur", "contractenrecht": "contract", "vastgoedrecht": "huis", "procederen": "scale"}
+
+def build_modellen():
+    trail = [("index.html", "Home"), ("modellen.html", "Modellen")]
+    zichtbaar = [m for m in MODELLEN if m["status"] in ("download", "aanvraag")]
+    # downloads: alleen modellen met status "download" komen op de website; oude bestanden gaan weg
+    dl_dir = OUT / "modellen"
+    dl_dir.mkdir(exist_ok=True)
+    for f in dl_dir.glob("*.docx"):
+        f.unlink()
+    for m in zichtbaar:
+        if m["status"] == "download":
+            make_docx(m, dl_dir / bestandsnaam(m))
+    gebied_naam = dict(GEBIEDEN)
+    gebruikt = [(g, n) for g, n in GEBIEDEN if any(m["gebied"] == g for m in zichtbaar)]
+    chips = "".join(f'<button class="chip" type="button" data-model-filter="{v}" aria-pressed="false">{l}</button>'
+                    for v, l in [("alle", "Alle modellen")] + gebruikt + [("download", "Direct te downloaden")])
+
+    def card(m):
+        if m["status"] == "download":
+            pill = f'<span class="lock-pill dl-pill">{ICON["contract"]} Gratis download (Word)</span>'
+            knop = f'<a class="btn btn--primary" href="modellen/{bestandsnaam(m)}" download>Download model</a>'
+        else:
+            pill = f'<span class="lock-pill">{ICON["lock"]} Op aanvraag</span>'
+            knop = f'<a class="btn btn--outline" href="#aanvragen" data-vraag-model="{m["slug"]}">Vraag dit model aan</a>'
+        return f'''<article class="card model-card reveal" id="{m["slug"]}" data-gebied="{m["gebied"]}" data-status="{m["status"]}">
+  {pill}
+  <p class="model-meta">{html.escape(gebied_naam[m["gebied"]])} · {html.escape(m["soort"])} · voor {html.escape(m["voor"].lower())}</p>
+  <h3>{html.escape(m["titel"])}</h3>
+  <p>{html.escape(m["kort"])}</p>
+  <div class="model-actions">{knop}</div>
+</article>'''
+
+    aanvraag = [m for m in zichtbaar if m["status"] == "aanvraag"]
+    opts = "".join(f'<optgroup label="{html.escape(n)}">' + "".join(
+        f'<option value="{html.escape(m["titel"])}" data-slug="{m["slug"]}">{html.escape(m["titel"])}</option>'
+        for m in aanvraag if m["gebied"] == g) + "</optgroup>" for g, n in GEBIEDEN if any(m["gebied"] == g for m in aanvraag))
+    body = f'''{hero_page(trail, "Modellen", "Modellen en voorbeeldbrieven", "Zelf aan de slag met een bezwaarschrift, een protestbrief of een ingebrekestelling? Hier vindt u modellen in gewone taal, met uitleg over termijnen en valkuilen. Sommige kunt u direct downloaden, andere sturen wij u op aanvraag.")}
+<section class="section section--tint">
+  <div class="container">
+    <div class="filters" role="group" aria-label="Modellen filteren">{chips}</div>
+    <div class="grid-3" data-model-list>{"".join(card(m) for m in zichtbaar)}</div>
+    <p class="disclaimer">De modellen zijn algemene informatie en geen juridisch advies. Elke zaak is anders. Controleer altijd de termijnen en pas de tekst aan uw situatie aan. Versie {VERSIE}.</p>
+  </div>
+</section>
+<section class="section" id="aanvragen">
+  <div class="container layout-aside">
+    <div>
+      <span class="eyebrow">Op aanvraag</span>
+      <h2>Vraag een model aan</h2>
+      <p>Processtukken en contracten moeten passen bij uw zaak. Daarom sturen wij deze modellen op aanvraag. Vertel kort waarvoor u het model nodig heeft; dan kijken wij of het past en of er een termijn loopt waar u op moet letten.</p>
+      <form class="form" data-form action="{FORM}" method="POST" data-success="Bedankt! Wij hebben uw aanvraag ontvangen en sturen u zo snel mogelijk bericht per e-mail.">
+        <input type="hidden" name="_subject" value="Aanvraag model via law-research.nl">
+        <input type="hidden" name="formulier" value="Model aanvragen">
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="field"><label for="m-model">Welk model?</label><select id="m-model" name="model" required><option value="">Kies een model</option>{opts}</select></div>
+        <div class="form-row">
+          <div class="field"><label for="m-naam">Naam</label><input id="m-naam" name="naam" autocomplete="name" required></div>
+          <div class="field"><label for="m-email">E-mailadres</label><input id="m-email" name="email" type="email" autocomplete="email" required></div>
+        </div>
+        <div class="field"><label for="m-rol">Ik ben</label><select id="m-rol" name="ik_ben"><option>Particulier</option><option>Ondernemer / organisatie</option><option>Jurist / professional</option><option>Student</option></select></div>
+        <div class="field"><label for="m-situatie">Waarvoor heeft u het model nodig?</label><textarea id="m-situatie" name="situatie" required placeholder="Bijvoorbeeld: ik ben op 3 november ontslagen op staande voet en wil een verzoekschrift indienen."></textarea></div>
+        <label class="consent"><input type="checkbox" name="toestemming" value="ja" required> <span>Ik ga akkoord dat Law &amp; Research mijn gegevens gebruikt om mijn aanvraag te behandelen (zie de <a href="privacy.html">privacyverklaring</a>).</span></label>
+        <div class="form-status" role="status" aria-live="polite" hidden></div>
+        <div><button class="btn btn--primary" type="submit">Vraag het model aan</button></div>
+      </form>
+    </div>
+    <aside class="aside-card">
+      <h3>Loopt er een termijn?</h3>
+      <p>Bij bezwaar en beroep is dat meestal zes weken. Na een ontslag op staande voet heeft u twee maanden om naar de rechter te stappen. Wacht daarom niet te lang.</p>
+      <p>Liever dat wij meekijken of het stuk voor u opstellen? <a href="contact.html">Neem contact op</a> of mail naar <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
+    </aside>
+  </div>
+</section>
+{cta_band()}'''
+    items = [{"@type": "ListItem", "position": i + 1, "item": {
+        "@type": "DigitalDocument", "name": m["titel"], "description": m["kort"], "inLanguage": "nl-NL",
+        "about": gebied_naam[m["gebied"]], "isAccessibleForFree": m["status"] == "download",
+        "url": f'{SITE}/modellen.html#{m["slug"]}', "publisher": {"@id": ORG_ID}}} for i, m in enumerate(zichtbaar)]
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Modellen en voorbeeldbrieven", "url": SITE + "/modellen.html",
+          "inLanguage": "nl-NL", "publisher": {"@id": ORG_ID}, "mainEntity": {"@type": "ItemList", "itemListElement": items}}
+    page("modellen.html", "Modellen en voorbeeldbrieven | Law & Research",
+         "Gratis voorbeeldbrieven en modellen: bezwaarschrift, protest tegen ontslag op staande voet, ingebrekestelling en meer. Processtukken en contracten op aanvraag.",
+         body, ld=(ORG, ld, breadcrumb_ld(trail)))
+
 # ---------- research ----------
 def build_research():
     trail = [("index.html", "Home"), ("research.html", "Research")]
@@ -925,14 +1014,14 @@ def build_404():
     # 404 wordt vanaf elke diepte getoond: maak relatieve paden absoluut
     p = OUT / "404.html"
     t = p.read_text(encoding="utf-8")
-    for a in ('href="assets/', 'src="assets/', 'href="index.html', 'href="nieuws.html', 'href="research.html', 'href="over-ons.html',
+    for a in ('href="assets/', 'src="assets/', 'href="index.html', 'href="nieuws.html', 'href="modellen.html', 'href="research.html', 'href="over-ons.html',
               'href="contact.html', 'href="privacy.html', 'href="bestuursrecht.html', 'href="arbeidsrecht.html', 'href="contractenrecht.html', 'href="vastgoedrecht.html'):
         t = t.replace(a, a.replace('="', '="/'))
     p.write_text(t, encoding="utf-8")
 
 def build_meta():
     pages = [("", "1.0", "weekly"), ("bestuursrecht.html", "0.9", "monthly"), ("arbeidsrecht.html", "0.9", "monthly"),
-             ("contractenrecht.html", "0.9", "monthly"), ("vastgoedrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("research.html", "0.6", "monthly"),
+             ("contractenrecht.html", "0.9", "monthly"), ("vastgoedrecht.html", "0.9", "monthly"), ("nieuws.html", "0.8", "weekly"), ("modellen.html", "0.7", "monthly"), ("research.html", "0.6", "monthly"),
              ("over-ons.html", "0.6", "yearly"), ("contact.html", "0.7", "yearly"), ("privacy.html", "0.2", "yearly")]
     urls = "".join(f"  <url><loc>{SITE}/{u}</loc><lastmod>{TODAY}</lastmod><changefreq>{c}</changefreq><priority>{p}</priority></url>\n" for u, p, c in pages)
     (OUT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf-8")
@@ -947,5 +1036,5 @@ if __name__ == "__main__":
     build_home()
     for a, _, _, _ in AREAS:
         build_area(a)
-    build_news(); build_research(); build_about(); build_contact(); build_privacy(); build_404(); build_meta()
+    build_news(); build_modellen(); build_research(); build_about(); build_contact(); build_privacy(); build_404(); build_meta()
     print("ok")
