@@ -537,8 +537,7 @@ AREA_PAGES = {
 <li>Ziekte, re-integratie en een slapend dienstverband</li>
 <li>Loonvordering, vakantiegeld en transitievergoeding</li>
 <li>Concurrentie- en relatiebeding</li>
-</ul>
-<p>Mr. Blokland heeft ruim 20 jaar juridische ervaring, onder meer als jurist bij de FNV, en kent de positie van werknemers van dichtbij.</p>''',
+</ul>''',
   ondernemer='''<ul class="check-list">
 <li>Opstellen van arbeidsovereenkomsten, personeelsregelingen en vaststellingsovereenkomsten</li>
 <li>Advies en mediation bij arbeidsgeschillen</li>
