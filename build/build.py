@@ -533,12 +533,23 @@ AREA_PAGES = {
 <li>Bezwaar en beroep bij de rechtbank en de Raad van State</li>
 </ul>
 <p>Veel ondernemers ervaren wet- en regelgeving als een jungle. Wij helpen u de weg te vinden.</p>''',
-  extra='''<h2>Rekenhulp: tot wanneer kunt u bezwaar maken of beroep instellen?</h2>
-<p>De termijn voor bezwaar en voor beroep bij de rechtbank is meestal <strong>zes weken</strong>. Die begint op de dag na de dag waarop het besluit of de beslissing op bezwaar is bekendgemaakt (meestal de datum van de brief).</p>
-<div class="tool" id="bezwaar-calc">
-  <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (bekendmaking)</label><input type="date" id="besluitdatum"></div>
+  extra='''<h2>Beslisboom: tot wanneer en waar kunt u bezwaar maken of beroep instellen?</h2>
+<p>Beantwoord drie korte vragen. U ziet dan tot wanneer u de tijd heeft en bij wie u bezwaar of beroep instelt. De termijn is meestal <strong>zes weken</strong>, gerekend vanaf de dag na de datum van het besluit.</p>
+<div class="tool beslisboom" id="bezwaar-calc">
+  <div class="bb-step">
+    <h3><span class="bb-num">1</span> Wat is de datum van het besluit?</h3>
+    <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (meestal de datum van de brief)</label><input type="date" id="besluitdatum"></div>
+  </div>
+  <div class="bb-step">
+    <h3><span class="bb-num">2</span> Wie heeft het besluit genomen?</h3>
+    <div class="bb-options" data-bb="org" role="group" aria-label="Wie heeft het besluit genomen?"></div>
+  </div>
+  <div class="bb-step" data-bb-sub hidden>
+    <h3><span class="bb-num">3</span> Waar gaat het besluit over?</h3>
+    <div class="bb-options" data-bb="type" role="group" aria-label="Waar gaat het besluit over?"></div>
+  </div>
   <div class="tool-result" aria-live="polite" hidden></div>
-  <p class="disclaimer">Indicatie op basis van art. 6:7 en 6:8 Awb en de Algemene termijnenwet. Soms geldt een andere termijn; die staat dan onder het besluit. Twijfelt u? Neem contact op.</p>
+  <p class="disclaimer">Indicatie op basis van de Algemene wet bestuursrecht (art. 6:7 en 6:8 Awb) en de Algemene termijnenwet. Soms geldt een andere termijn of route; die staat dan onderaan het besluit. Twijfelt u? Neem contact op.</p>
 </div>
 <p><a class="btn btn--primary" href="pro-forma-bezwaarschrift.html">Pro forma bezwaarschrift invullen en downloaden</a></p>''',
   faqs=[("Hoe lang heb ik om bezwaar te maken?", "Meestal zes weken, gerekend vanaf de dag na de dag waarop het besluit is bekendgemaakt. Valt de laatste dag in een weekend of op een feestdag, dan schuift de termijn op naar de eerstvolgende werkdag."),
@@ -654,8 +665,8 @@ def current_html(slug):
     if not c:
         return ""
     src = "".join(f'<li><a href="{html.escape(u)}" rel="noopener" target="_blank">{html.escape(t)}</a></li>' for t, u in c["sources"])
-    return f'''<section class="current-research" id="actueel-onderzoek" aria-labelledby="ao-{slug}">
-<span class="eyebrow">Actueel onderzoek</span>
+    return f'''<section class="current-research" id="onderzoek-{slug}" aria-labelledby="ao-{slug}">
+<span class="eyebrow">{AREA_NAME[slug]}</span>
 <h2 id="ao-{slug}">{html.escape(c["title"])}</h2>
 <div class="compare">
   <div><h3>Nederland</h3><p>{html.escape(c["nl"])}</p></div>
@@ -665,13 +676,12 @@ def current_html(slug):
 <p class="news-source">Bronnen:</p><ul class="ref-list">{src}</ul>
 </section>'''
 
-def refs_html(refs):
+def refs_html(slug, refs):
     if not refs:
         return ""
     items = "".join(f'<li>{html.escape(r["cite"])} <a href="{html.escape(r["url"])}" rel="noopener" target="_blank">Bekijk de publicatie</a><br><span>{html.escape(r["note"])}</span></li>' for r in refs)
-    return f'''<h2>Literatuur en onderzoek</h2>
-<p>Wij volgen het wetenschappelijk onderzoek op dit rechtsgebied. Een selectie van publicaties waar wij in ons advies gebruik van maken:</p>
-<ul class="ref-list">{items}</ul>'''
+    return f'''<div class="ref-group" id="literatuur-{slug}"><h3>{AREA_NAME[slug]}</h3>
+<ul class="ref-list">{items}</ul></div>'''
 
 PRAKTIJK = '''<div class="praktijk">
   <span class="eyebrow">Uit de praktijk</span>
@@ -691,7 +701,7 @@ def build_area(slug):
     name = AREA_NAME[slug]
     icon = dict((a, i) for a, _, i, _ in AREAS)[slug]
     trail = [("index.html", "Home"), (slug + ".html", name)]
-    rel = [n for n in NEWS if n["gebied"] == slug][:2]
+    rel = [n for n in NEWS if n["gebied"] == slug][:1]
     calc = f'''<section class="calc-top"><div class="container"><div class="calc-wrap">{p["extra"]}</div></div></section>''' if p["extra"] else ""
     body = f'''{hero_page(trail, name, p["h1"], p["lead"])}
 {calc}
@@ -711,8 +721,6 @@ def build_area(slug):
       {PRAKTIJK if slug == "bestuursrecht" else ""}
       <h2>Veelgestelde vragen over {name.lower()}</h2>
       {faq_html(p["faqs"])}
-      {current_html(slug)}
-      {refs_html(REFS.get(slug, []))}
       {BUDGET}
     </div>
     {contact_aside(slug)}
@@ -722,8 +730,8 @@ def build_area(slug):
   <div class="container">
     <div class="section-head"><span class="eyebrow">Nieuws</span><h2>Actueel in het {name.lower()}</h2></div>
     {LEGEND}
-    <div class="news-list">{"".join(news_card(n) for n in rel)}</div>
-    <p style="margin-top:28px"><a class="btn btn--outline" href="nieuws.html?gebied={slug}">Al het nieuws over {name.lower()}</a> <a class="btn btn--outline" href="nieuws.html">Alle nieuwsberichten</a></p>
+    <div class="news-list news-list--single">{"".join(news_card(n) for n in rel)}</div>
+    <p style="margin-top:28px"><a class="btn btn--primary" href="nieuws.html?gebied={slug}">Klik hier voor meer nieuws over {name.lower()}</a></p>
   </div>
 </section>
 {cta_band()}'''
@@ -827,27 +835,31 @@ def build_research():
   <p class="blur" aria-hidden="true">Samenvatting, conclusies en bronnen zijn beschikbaar na goedkeuring van uw aanvraag.</p>
 </article>''' for t, a, d in locked)
     opts = "".join(f'<label class="consent"><input type="checkbox" name="interesse" value="{n}"> {n}</label>' for _, n, _, _ in AREAS)
-    current_cards = "".join(f'''<article class="card reveal"><span class="icon-badge">{ICON[i]}</span>
-  <p style="font-size:.9rem;color:var(--navy-600);font-weight:600">{n}</p>
-  <h3>{html.escape(CURRENT[a]["title"])}</h3>
-  <p>{html.escape(CURRENT[a]["nl"].split(". ")[0])}. En in het Verenigd Koninkrijk?</p>
-  <a class="more" href="{a}.html#actueel-onderzoek">Lees de vergelijking</a></article>''' for a, n, i, _ in AREAS if a in CURRENT)
+    current_blocks = "".join(current_html(a) for a, _, _, _ in AREAS)
+    lit_blocks = "".join(refs_html(a, REFS.get(a, [])) for a, _, _, _ in AREAS)
     body = f'''{hero_page(trail, "Research", "Juridisch onderzoek, op aanvraag beschikbaar", "Naast onze rechtsbijstand doen wij juridisch onderzoek. Analyses, jurisprudentieoverzichten en checklists stellen wij beschikbaar voor professionals, organisaties en studenten. Vraag hieronder toegang aan.")}
 <section class="section section--tint">
   <div class="container">
     <div class="section-head"><span class="eyebrow">Actueel onderzoek</span><h2>Nederland en het Verenigd Koninkrijk vergeleken</h2>
       <p class="lead">Hoe lossen andere landen dezelfde juridische vragen op? Per rechtsgebied zetten wij een actuele ontwikkeling in breder perspectief.</p></div>
-    <div class="grid-4">{current_cards}</div>
+    <div class="research-stack">{current_blocks}</div>
   </div>
 </section>
-<section class="section">
+<section class="section" id="literatuur">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Literatuur en onderzoek</span><h2>Publicaties per rechtsgebied</h2>
+      <p class="lead">Wij volgen het wetenschappelijk onderzoek. Een selectie van publicaties waar wij in ons advies gebruik van maken. Let op: niet alle publicaties zijn vrij toegankelijk; sommige staan achter een betaalmuur van een uitgever of tijdschrift.</p></div>
+    <div class="ref-groups">{lit_blocks}</div>
+  </div>
+</section>
+<section class="section section--tint">
   <div class="container">
     <div class="section-head"><span class="eyebrow">Publicaties</span><h2>Beschikbaar na goedkeuring</h2>
       <p class="lead">Na uw aanvraag beoordelen wij of wij u toegang kunnen geven. U ontvangt bericht per e-mail.</p></div>
     <div class="grid-3">{cards}</div>
   </div>
 </section>
-<section class="section section--tint" id="aanvragen">
+<section class="section" id="aanvragen">
   <div class="container layout-aside">
     <div>
       <span class="eyebrow">Toegang aanvragen</span>

@@ -153,18 +153,94 @@
       return d.getDay() === 0 || d.getDay() === 6 || holidays(d.getFullYear()).indexOf(key(d)) !== -1;
     };
     var fmt = new Intl.DateTimeFormat("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-    var run = function () {
-      if (!input.value) { out.hidden = true; return; }
+
+    /* Beslisboom: wie nam het besluit, waar gaat het over, en wat is de route? */
+    var RB = "de rechtbank (sector bestuursrecht) in uw regio";
+    var CRVB = "hoger beroep bij de Centrale Raad van Beroep";
+    var RVS = "hoger beroep bij de Afdeling bestuursrechtspraak van de Raad van State";
+    var HOF = "hoger beroep bij het gerechtshof, en daarna eventueel cassatie bij de Hoge Raad";
+    var route = function (bezwaar, beroep, hoger, tip) { return { steps: [bezwaar, beroep, hoger].filter(Boolean), tip: tip || "", termijn: true }; };
+    var TREE = {
+      gemeente: { label: "Gemeente", types: {
+        bijstand: ["Bijstand (Participatiewet)", route("Bezwaar maken bij het college van burgemeester en wethouders van uw gemeente.", "Beroep bij " + RB + ".", "Daarna eventueel " + CRVB + ".", "Wordt uw uitkering stopgezet of teruggevorderd en kunt u niet wachten? Vraag de rechter dan ook om een voorlopige voorziening.")],
+        bijzonder: ["Bijzondere bijstand", route("Bezwaar maken bij het college van burgemeester en wethouders van uw gemeente.", "Beroep bij " + RB + ".", "Daarna eventueel " + CRVB + ".", "Bewaar bonnen, offertes en rekeningen: die heeft u nodig om de kosten aan te tonen.")],
+        zorg: ["Wmo of Jeugdwet (zorg en ondersteuning)", route("Bezwaar maken bij het college van burgemeester en wethouders van uw gemeente.", "Beroep bij " + RB + ".", "Daarna eventueel " + CRVB + ".")],
+        belasting: ["WOZ-waarde of gemeentelijke belasting", route("Bezwaar maken bij de heffingsambtenaar van de gemeente (soms een samenwerkingsverband, zoals een belastingkantoor van meerdere gemeenten).", "Beroep bij " + RB + ".", "Daarna eventueel " + HOF + ".")],
+        anders: ["Ander besluit (bijvoorbeeld een vergunning of handhaving)", route("Bezwaar maken bij het college van burgemeester en wethouders van uw gemeente.", "Beroep bij " + RB + ".", "Daarna eventueel " + RVS + ".", "Bij sommige vergunningen is er geen bezwaar, maar gaat u direct in beroep bij de rechtbank. Kijk onderaan het besluit.")]
+      } },
+      uwv: { label: "UWV", route: route("Bezwaar maken bij het UWV (dat kan ook digitaal via Mijn UWV).", "Beroep bij " + RB + ".", "Daarna eventueel " + CRVB + ".", "Dit geldt onder meer voor de WW, de WIA, de Ziektewet en de Wajong.") },
+      provincie: { label: "Provincie", route: route("Bezwaar maken bij Gedeputeerde Staten van de provincie.", "Beroep bij " + RB + ".", "Daarna eventueel " + RVS + ".", "Bij sommige besluiten is er geen bezwaar, maar gaat u direct in beroep. Kijk onderaan het besluit.") },
+      belastingdienst: { label: "Belastingdienst", types: {
+        aanslag: ["Belastingaanslag (bijvoorbeeld inkomstenbelasting)", route("Bezwaar maken bij de inspecteur van de Belastingdienst.", "Beroep bij " + RB + ".", "Daarna eventueel " + HOF + ".")],
+        toeslag: ["Toeslag (huur-, zorg- of kinderopvangtoeslag, kindgebonden budget)", route("Bezwaar maken bij Dienst Toeslagen.", "Beroep bij " + RB + ".", "Daarna eventueel " + RVS + ".", "Moet u een toeslag terugbetalen? U kunt ook een betalingsregeling vragen; dat staat los van uw bezwaar.")]
+      } },
+      duo: { label: "DUO", route: route("Bezwaar maken bij DUO.", "Beroep bij " + RB + ".", "Daarna eventueel " + CRVB + ".", "Dit geldt voor studiefinanciering, het studievoorschot en de terugbetaling van uw studieschuld.") },
+      school: { label: "School, hogeschool of universiteit", types: {
+        examen: ["Hogeschool of universiteit: tentamen, examen of bindend studieadvies", { steps: ["Beroep instellen bij het College van beroep voor de examens (CBE) van uw hogeschool of universiteit.", "Daarna eventueel beroep bij het College van Beroep voor het Hoger Onderwijs (CBHO) in Den Haag."], tip: "Ook hier geldt meestal een termijn van zes weken. Het CBE probeert vaak eerst een schikking.", termijn: true }],
+        hoger: ["Hogeschool of universiteit: ander besluit (inschrijving, toelating, collegegeld)", { steps: ["Bezwaar maken bij de hogeschool of universiteit (meestal via het loket voor bezwaar en beroep).", "Daarna eventueel beroep bij het College van Beroep voor het Hoger Onderwijs (CBHO) in Den Haag."], tip: "Dit geldt voor bekostigde (door de overheid betaalde) hogescholen en universiteiten. Bij een particuliere opleiding gelden andere regels.", termijn: true }],
+        school: ["Basisschool, middelbare school of mbo", { steps: ["Meestal is dit geen bestuursrecht. Kijk in de klachtenregeling, het examenreglement of de schoolgids.", "Bij een mbo-examen kunt u meestal beroep instellen bij de commissie van beroep voor de examens van de school."], tip: "De termijnen staan in het reglement van de school en zijn vaak korter dan zes weken.", termijn: false }]
+      } },
+      anders: { label: "Andere overheidsinstantie", route: route("Bezwaar maken bij de instantie die het besluit heeft genomen (bijvoorbeeld de SVB of de IND).", "Daarna beroep bij " + RB + ".", "", "Bij wie u bezwaar maakt en welke termijn geldt, staat altijd onderaan het besluit.") }
+    };
+    var orgBox = calc.querySelector('[data-bb="org"]');
+    var typeBox = calc.querySelector('[data-bb="type"]');
+    var subStep = calc.querySelector("[data-bb-sub]");
+    var pick = { org: null, type: null };
+    var chip = function (value, label, group) {
+      return '<button class="chip" type="button" data-value="' + value + '" data-group="' + group + '" aria-pressed="false">' + label + "</button>";
+    };
+    orgBox.innerHTML = Object.keys(TREE).map(function (k) { return chip(k, TREE[k].label, "org"); }).join("");
+    var press = function (box, value) {
+      box.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", String(c.dataset.value === value)); });
+    };
+    var deadline = function () {
+      if (!input.value) return null;
       var p = input.value.split("-");
-      var start = new Date(+p[0], +p[1] - 1, +p[2]);
-      var end = plus(start, 42); // termijn begint de dag na bekendmaking en duurt zes weken
+      var end = plus(new Date(+p[0], +p[1] - 1, +p[2]), 42); // termijn begint de dag na bekendmaking en duurt zes weken
       var moved = false;
       while (isFree(end)) { end = plus(end, 1); moved = true; }
-      out.innerHTML = "<small>Uw bezwaar- of beroepschrift moet uiterlijk binnen zijn op</small><strong>" + fmt.format(end) +
-        "</strong><small>" + (moved ? "De termijn eindigde in een weekend of op een feestdag en schuift daarom op naar de eerstvolgende werkdag. " : "") +
-        "Wacht niet tot de laatste dag: stuur het liefst aangetekend of via het officiële digitale loket.</small>";
+      return { end: end, moved: moved };
+    };
+    var run = function () {
+      var org = pick.org && TREE[pick.org];
+      var r = org && (org.route || (pick.type && org.types[pick.type] && org.types[pick.type][1]));
+      var d = deadline();
+      if (!d && !r) { out.hidden = true; return; }
+      var html = "";
+      if (d && (!r || r.termijn)) {
+        html += "<small>Uw bezwaar- of beroepschrift moet uiterlijk binnen zijn op</small><strong>" + fmt.format(d.end) + "</strong>";
+        if (d.moved) html += "<small>De termijn eindigde in een weekend of op een feestdag en schuift daarom op naar de eerstvolgende werkdag.</small>";
+      } else if (!d && r && r.termijn) {
+        html += "<small>Vul bij vraag 1 de datum van het besluit in, dan rekenen wij uw uiterste datum uit.</small>";
+      }
+      if (r) {
+        html += '<ol class="bb-route">' + r.steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
+        if (r.tip) html += "<small>" + r.tip + "</small>";
+        if (r.termijn) html += '<p class="bb-actions"><a class="btn btn--light" href="pro-forma-bezwaarschrift.html">Pro forma bezwaarschrift invullen</a> <a class="btn btn--ghost" href="contact.html?onderwerp=bestuursrecht">Leg uw vraag voor</a></p>';
+        else html += '<p class="bb-actions"><a class="btn btn--light" href="contact.html?onderwerp=bestuursrecht">Leg uw vraag voor</a></p>';
+      } else if (org && org.types) {
+        html += "<small>Kies bij vraag 3 waar het besluit over gaat.</small>";
+      } else {
+        html += "<small>Kies bij vraag 2 wie het besluit heeft genomen, dan ziet u bij wie u bezwaar of beroep instelt.</small>";
+      }
+      if (d && !(r && r.termijn === false)) html += "<small>Wacht niet tot de laatste dag: stuur het liefst aangetekend of via het officiële digitale loket.</small>";
+      out.innerHTML = html;
       out.hidden = false;
     };
+    orgBox.addEventListener("click", function (e) {
+      var b = e.target.closest(".chip"); if (!b) return;
+      pick.org = b.dataset.value; pick.type = null; press(orgBox, pick.org);
+      var t = TREE[pick.org].types;
+      if (t) {
+        typeBox.innerHTML = Object.keys(t).map(function (k) { return chip(k, t[k][0], "type"); }).join("");
+        subStep.hidden = false;
+      } else { typeBox.innerHTML = ""; subStep.hidden = true; }
+      run();
+    });
+    typeBox.addEventListener("click", function (e) {
+      var b = e.target.closest(".chip"); if (!b) return;
+      pick.type = b.dataset.value; press(typeBox, pick.type); run();
+    });
     input.addEventListener("change", run);
     input.addEventListener("input", run);
   }
