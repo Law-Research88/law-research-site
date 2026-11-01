@@ -511,12 +511,23 @@ AREA_PAGES = {
 <li>Bezwaar en beroep bij de rechtbank en de Raad van State</li>
 </ul>
 <p>Veel ondernemers ervaren wet- en regelgeving als een jungle. Wij helpen u de weg te vinden.</p>''',
-  extra='''<h2>Rekenhulp: tot wanneer kunt u bezwaar maken of beroep instellen?</h2>
-<p>De termijn voor bezwaar en voor beroep bij de rechtbank is meestal <strong>zes weken</strong>. Die begint op de dag na de dag waarop het besluit of de beslissing op bezwaar is bekendgemaakt (meestal de datum van de brief).</p>
-<div class="tool" id="bezwaar-calc">
-  <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (bekendmaking)</label><input type="date" id="besluitdatum"></div>
+  extra='''<h2>Beslisboom: tot wanneer en waar kunt u bezwaar maken of beroep instellen?</h2>
+<p>Beantwoord drie korte vragen. U ziet dan tot wanneer u de tijd heeft en bij wie u bezwaar of beroep instelt. De termijn is meestal <strong>zes weken</strong>, gerekend vanaf de dag na de datum van het besluit.</p>
+<div class="tool beslisboom" id="bezwaar-calc">
+  <div class="bb-step">
+    <h3><span class="bb-num">1</span> Wat is de datum van het besluit?</h3>
+    <div class="field"><label for="besluitdatum">Datum van het besluit of de beslissing op bezwaar (meestal de datum van de brief)</label><input type="date" id="besluitdatum"></div>
+  </div>
+  <div class="bb-step">
+    <h3><span class="bb-num">2</span> Wie heeft het besluit genomen?</h3>
+    <div class="bb-options" data-bb="org" role="group" aria-label="Wie heeft het besluit genomen?"></div>
+  </div>
+  <div class="bb-step" data-bb-sub hidden>
+    <h3><span class="bb-num">3</span> Waar gaat het besluit over?</h3>
+    <div class="bb-options" data-bb="type" role="group" aria-label="Waar gaat het besluit over?"></div>
+  </div>
   <div class="tool-result" aria-live="polite" hidden></div>
-  <p class="disclaimer">Indicatie op basis van art. 6:7 en 6:8 Awb en de Algemene termijnenwet. Soms geldt een andere termijn; die staat dan onder het besluit. Twijfelt u? Neem contact op.</p>
+  <p class="disclaimer">Indicatie op basis van de Algemene wet bestuursrecht (art. 6:7 en 6:8 Awb) en de Algemene termijnenwet. Soms geldt een andere termijn of route; die staat dan onderaan het besluit. Twijfelt u? Neem contact op.</p>
 </div>''',
   faqs=[("Hoe lang heb ik om bezwaar te maken?", "Meestal zes weken, gerekend vanaf de dag na de dag waarop het besluit is bekendgemaakt. Valt de laatste dag in een weekend of op een feestdag, dan schuift de termijn op naar de eerstvolgende werkdag."),
         ("Wat gebeurt er als ik te laat ben?", "Een te laat bezwaar wordt meestal niet-ontvankelijk verklaard. Dan wordt er niet meer inhoudelijk naar gekeken. Alleen in uitzonderlijke situaties wordt een termijnoverschrijding verschoonbaar geacht. Reageer daarom altijd op tijd, desnoods met een kort 'pro forma' bezwaar."),
