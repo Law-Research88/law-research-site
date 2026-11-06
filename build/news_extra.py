@@ -307,4 +307,11 @@ EXTRA = [
          foryou=["Houd er bij een procedure tegen de overheid rekening mee dat u ook bij winst maar een deel van uw kosten terugkrijgt. Vraag vooraf naar de kosten en de verwachte vergoeding.",
                  "Heeft u een laag inkomen? Kijk dan of u in aanmerking komt voor gesubsidieerde rechtsbijstand of een rechtsbijstandverzekering."],
          source="EHRM, Veldsink-Schoonbeek en Veldsink t. Nederland, nr. 26337/22", url="https://hudoc.echr.coe.int/app/conversion/pdf/?library=ECHR&id=003-8653629-12335286&filename=Judgments+of+06.10.2026.pdf"),
+    dict(id="wet-handhaving-sociale-zekerheid", type="wetgeving", gebied="bestuursrecht", date="2026-10-27", thema=["sociale-zekerheid"],
+         datelabel="Aangenomen door de Eerste Kamer, 27 oktober 2026",
+         title="Te veel uitkering gekregen door een fout van het UWV of de gemeente? Straks hoeft u het vaak niet terug te betalen",
+         text="De Eerste Kamer heeft op 27 oktober een wet aangenomen die de regels rond uitkeringen milder maakt. UWV, SVB en gemeenten moeten voortaan meer rekening houden met iemands persoonlijke situatie. Een eerlijke vergissing hoeft niet meer automatisch tot een boete te leiden, en in plaats van een boete kan een waarschuwing volgen. Heeft de instantie zelf een fout gemaakt, dan wordt terugvordering in veel gevallen niet meer verplicht. Wordt een wijziging niet doorgegeven, dan mag de instantie in de regel nog maar vijf jaar terug in plaats van twintig jaar. Bij fraude blijft de oude termijn gelden. De datum waarop de wet ingaat, wordt nog vastgesteld. Het kabinet mikt op 1 januari 2027.",
+         foryou=["Heeft u een terugvordering of boete gekregen voor een fout die u niet kon zien? Maak binnen zes weken bezwaar en vraag de instantie om rekening te houden met uw situatie.",
+                 "Geef wijzigingen in uw situatie altijd schriftelijk door en bewaar een kopie. Dat bewijs wordt onder de nieuwe regels nog belangrijker."],
+         source="Wet handhaving sociale zekerheid (Kamerstuk 36.785)", url="https://www.eerstekamer.nl/wetsvoorstel/36785_wet_handhaving_sociale"),
 ]
