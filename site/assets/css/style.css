@@ -80,6 +80,11 @@ p { margin: 0 0 1em; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
 .cta .btn-row { margin-top: 0; }
 .aside-card .btn-row .btn { width: 100%; }
+.btn--whatsapp { background: #25D366; color: #0b1f33; }
+.btn--whatsapp:hover { background: #1ebe5b; color: #0b1f33; }
+.btn--whatsapp .wa-logo { width: 1.4em; height: 1.4em; }
+.wa-link { display: inline-flex; align-items: center; gap: 6px; }
+.wa-link .wa-logo { width: 18px; height: 18px; }
 .btn[disabled] { opacity: .6; cursor: wait; transform: none; }
 
 /* Header */

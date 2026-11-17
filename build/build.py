@@ -34,7 +34,10 @@ ICON = {
     "lock": svg('<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
     "mail": svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>'),
     "phone": svg('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>'),
-    "whatsapp": svg('<path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8a4.5 4.5 0 0 1-2.2-2.2l.8-1-1-2z"/>'),
+    "whatsapp": ('<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="wa-logo">'
+                 '<path fill="#fff" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/>'
+                 '<path fill="#25D366" d="M12 3.7a8.3 8.3 0 0 0-7 12.7l.2.3-.8 2.9 3-.8.3.2A8.3 8.3 0 1 0 12 3.7z"/>'
+                 '<path fill="#fff" d="M9.1 7.3c-.2-.4-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9 2 3.1 4.9 4.3c2.4.9 2.9.8 3.4.7s1.7-.7 1.9-1.4.2-1.2.2-1.4l-.5-.3-1.7-.8c-.3-.1-.5-.1-.7.2l-.8 1c-.1.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.5l-.8-1.9z"/></svg>'),
     "clock": svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     "chat": svg('<path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12.5h5"/>'),
     "shield": svg('<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
@@ -246,7 +249,7 @@ FOOTER = f'''<footer class="site-footer">
         <h3>Contact</h3>
         <ul>
           <li><a href="tel:{PHONE_TEL}">{PHONE}</a></li>
-          <li><a href="{WHATSAPP}" target="_blank" rel="noopener">WhatsApp</a></li>
+          <li><a class="wa-link" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}WhatsApp</a></li>
           <li><a href="mailto:{EMAIL}">{EMAIL}</a></li>
           <li><a href="contact.html">Contactformulier</a></li>
         </ul>
@@ -355,7 +358,7 @@ def call_buttons(second="btn--ghost"):
     """'Bel nu' en 'Stuur WhatsApp-bericht' naast elkaar (voor donkerblauwe achtergrond)."""
     return (f'<div class="btn-row">'
             f'<a class="btn btn--light" href="tel:{PHONE_TEL}">{ICON["phone"]}Bel nu</a>'
-            f'<a class="btn {second}" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>'
+            f'<a class="btn btn--whatsapp" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>'
             f'</div>')
 
 def contact_aside(area=None):
@@ -417,7 +420,7 @@ def cta_band():
     <div class="btn-row">
       <a class="btn btn--light" href="contact.html">Leg uw vraag voor</a>
       <a class="btn btn--ghost" href="tel:{PHONE_TEL}">{ICON["phone"]}Bel nu</a>
-      <a class="btn btn--ghost" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>
+      <a class="btn btn--whatsapp" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>
     </div>
   </div>
 </section>'''
