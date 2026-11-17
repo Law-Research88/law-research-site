@@ -6,6 +6,9 @@ from pathlib import Path
 OUT = Path(sys.argv[1])
 SITE = "https://law-research.nl"
 EMAIL = "info@law-research.nl"
+PHONE = "+31 20 440 3688"
+PHONE_TEL = "+31204403688"
+WHATSAPP = "https://wa.me/31204403688"
 FORM = "https://formspree.io/f/JOUW_FORM_ID"
 TODAY = "2026-10-27"
 FIRST_PUBLISHED = "2026-10-13"  # publicatiedatum van berichten zonder eigen "published"
@@ -30,6 +33,8 @@ ICON = {
     "research": svg('<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/><path d="M8 10.5h5M10.5 8v5"/>'),
     "lock": svg('<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
     "mail": svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>'),
+    "phone": svg('<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>'),
+    "whatsapp": svg('<path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.4z"/><path d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8a4.5 4.5 0 0 1-2.2-2.2l.8-1-1-2z"/>'),
     "clock": svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     "chat": svg('<path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12.5h5"/>'),
     "shield": svg('<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'),
@@ -240,6 +245,8 @@ FOOTER = f'''<footer class="site-footer">
       <div>
         <h3>Contact</h3>
         <ul>
+          <li><a href="tel:{PHONE_TEL}">{PHONE}</a></li>
+          <li><a href="{WHATSAPP}" target="_blank" rel="noopener">WhatsApp</a></li>
           <li><a href="mailto:{EMAIL}">{EMAIL}</a></li>
           <li><a href="contact.html">Contactformulier</a></li>
         </ul>
@@ -332,24 +339,32 @@ ORG = {
     "logo": SITE + "/assets/img/icon-512.png",
     "image": SITE + "/assets/img/og-image.jpg",
     "email": EMAIL,
+    "telephone": PHONE_TEL,
     "description": "Juridisch advies en bijstand voor particulieren en ondernemers in bestuursrecht, arbeidsrecht, contractenrecht en vastgoedrecht.",
     "areaServed": {"@type": "Country", "name": "Nederland"},
     "availableLanguage": ["nl", "en"],
     "knowsAbout": ["Bestuursrecht", "Arbeidsrecht", "Contractenrecht", "Ambtenarenrecht", "Bezwaar en beroep", "Ontslagrecht", "Algemene voorwaarden", "Vastgoedrecht", "Huurrecht", "Koop van onroerende zaken"],
     "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Rechtsgebieden", "itemListElement": [
         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n, "url": f"{SITE}/{a}.html"}} for a, n, _, _ in AREAS]},
-    "contactPoint": {"@type": "ContactPoint", "contactType": "customer service", "email": EMAIL, "availableLanguage": ["Dutch", "English"]},
+    "contactPoint": {"@type": "ContactPoint", "contactType": "customer service", "email": EMAIL, "telephone": PHONE_TEL, "availableLanguage": ["Dutch", "English"]},
     # Vul hier later adres en telefoon aan (zie LEESMIJ.txt):
     # "address": {"@type": "PostalAddress", "streetAddress": "...", "postalCode": "...", "addressLocality": "...", "addressCountry": "NL"},
-    # "telephone": "+31 ...",
 }
+
+def call_buttons(second="btn--ghost"):
+    """'Bel nu' en 'Stuur WhatsApp-bericht' naast elkaar (voor donkerblauwe achtergrond)."""
+    return (f'<div class="btn-row">'
+            f'<a class="btn btn--light" href="tel:{PHONE_TEL}">{ICON["phone"]}Bel nu</a>'
+            f'<a class="btn {second}" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>'
+            f'</div>')
 
 def contact_aside(area=None):
     return f'''<aside class="aside-card">
   <h3>Direct uw vraag voorleggen</h3>
   <p>Beschrijf kort uw situatie. U hoort snel van ons of en hoe wij u kunnen helpen. Het eerste contact is vrijblijvend.</p>
   <a class="btn btn--light" href="contact.html{"?onderwerp=" + area if area else ""}">Neem contact op</a>
-  <p style="margin-top:18px;font-size:.95rem">Of mail naar <a href="mailto:{EMAIL}">{EMAIL}</a></p>
+  <p style="margin-top:18px;font-size:.95rem">Of bel <a href="tel:{PHONE_TEL}">{PHONE}</a> of mail naar <a href="mailto:{EMAIL}">{EMAIL}</a></p>
+  {call_buttons()}
 </aside>'''
 
 def contact_form(prefill=None):
@@ -399,7 +414,11 @@ def cta_band():
     return f'''<section class="section section--navy">
   <div class="container cta">
     <div><h2>Hulp nodig bij uw situatie?</h2><p>Leg uw vraag voor. Wij reageren meestal binnen één werkdag.</p></div>
-    <a class="btn btn--light" href="contact.html">Leg uw vraag voor</a>
+    <div class="btn-row">
+      <a class="btn btn--light" href="contact.html">Leg uw vraag voor</a>
+      <a class="btn btn--ghost" href="tel:{PHONE_TEL}">{ICON["phone"]}Bel nu</a>
+      <a class="btn btn--ghost" href="{WHATSAPP}" target="_blank" rel="noopener">{ICON["whatsapp"]}Stuur WhatsApp-bericht</a>
+    </div>
   </div>
 </section>'''
 
@@ -1050,7 +1069,7 @@ def build_about():
 # ---------- contact ----------
 def build_contact():
     trail = [("index.html", "Home"), ("contact.html", "Contact")]
-    body = f'''{hero_page(trail, "Contact", "Neem contact op", "Stel uw vraag via het formulier of mail ons direct. Wij reageren zo snel mogelijk, meestal binnen één werkdag.")}
+    body = f'''{hero_page(trail, "Contact", "Neem contact op", "Stel uw vraag via het formulier, bel of app ons, of mail ons direct. Wij reageren zo snel mogelijk, meestal binnen één werkdag.")}
 <section class="section">
   <div class="container layout-aside">
     <div>
@@ -1062,14 +1081,16 @@ def build_contact():
     <aside class="aside-card">
       <h3>Contactgegevens</h3>
       <p>{ICON["mail"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}<a href="mailto:{EMAIL}">{EMAIL}</a></p>
-      <p>{ICON["clock"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}Afspraken in overleg, ook buiten kantooruren.</p>
+      <p>{ICON["phone"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}<a href="tel:{PHONE_TEL}">{PHONE}</a></p>
+      {call_buttons()}
+      <p style="margin-top:18px">{ICON["clock"].replace('<svg', '<svg style="width:20px;height:20px;display:inline;vertical-align:-4px;margin-right:6px"')}Afspraken in overleg, ook buiten kantooruren.</p>
     </aside>
   </div>
 </section>'''
     ld = {"@context": "https://schema.org", "@type": "ContactPage", "name": "Contact", "url": SITE + "/contact.html",
           "inLanguage": "nl-NL", "about": {"@id": ORG_ID}}
     page("contact.html", "Contact | Law & Research",
-         "Stel uw juridische vraag aan Law & Research via het contactformulier of info@law-research.nl. Wij reageren meestal binnen één werkdag.",
+         "Stel uw juridische vraag aan Law & Research via het contactformulier, telefoon, WhatsApp of info@law-research.nl. Wij reageren meestal binnen één werkdag.",
          body, ld=(ORG, ld, breadcrumb_ld(trail)))
 
 # ---------- privacy ----------
@@ -1093,6 +1114,7 @@ def build_privacy():
     <!-- Vul deze gegevens in vóór livegang (zie LEESMIJ.txt). -->
     <ul>
       <li>Naam: Law &amp; Research</li>
+      <li>Telefoon en WhatsApp: <a href="tel:{PHONE_TEL}">{PHONE}</a></li>
       <li>E-mail: <a href="mailto:{EMAIL}">{EMAIL}</a></li>
       <li>Adres: [in te vullen]</li>
       <li>KvK-nummer: [in te vullen] · Btw-nummer: [in te vullen]</li>

@@ -76,6 +76,10 @@ p { margin: 0 0 1em; }
 .btn--ghost:hover { background: rgba(255,255,255,.1); color: var(--white); }
 .btn--outline { border-color: var(--navy-700); color: var(--navy-700); background: transparent; }
 .btn--outline:hover { background: var(--navy-700); color: var(--white); }
+.btn svg { width: 1.15em; height: 1.15em; flex: none; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+.cta .btn-row { margin-top: 0; }
+.aside-card .btn-row .btn { width: 100%; }
 .btn[disabled] { opacity: .6; cursor: wait; transform: none; }
 
 /* Header */
